@@ -2,7 +2,7 @@
 name = "alarmmgr-cli"
 version = "0.0.1"
 authors = ["Darwinia Network <hello@darwinia.network>"]
-description = "Darwinia bridger"
+description = "Program monitor"
 repository = "https://github.com/darwinia-network/alarmmgr"
 license = "MIT"
 documentation = "https://rust-docs.darwinia.network/alarmmgr"

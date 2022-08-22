@@ -2,7 +2,7 @@
 name = "alarmmgr-bin"
 version = "0.0.1"
 authors = ["Darwinia Network <hello@darwinia.network>"]
-description = "Darwinia bridger"
+description = "Program monitor"
 repository = "https://github.com/darwinia-network/alarmmgr"
 license = "MIT"
 documentation = "https://rust-docs.darwinia.network/alarmmgr"
@@ -23,6 +23,10 @@ path = "src/main.rs"
 
 [dependencies]
 color-eyre = "0.6"
+
+tracing            = "0.1"
+tracing-attributes = "0.1"
+tracing-subscriber = { version = "0.2", features = ["chrono"] }
 
 sentry     = "0.27"
 structopt  = "0.3"

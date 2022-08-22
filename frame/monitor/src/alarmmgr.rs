@@ -1,5 +1,7 @@
-use crate::error::MonitorResult;
+use alarmmgr_toolkit::logk;
 use alarmmgr_types::config::Config;
+
+use crate::error::MonitorResult;
 
 /// alarmmgr monitor
 pub struct AlarmmgrMonitor {
@@ -17,6 +19,7 @@ impl AlarmmgrMonitor {
   /// monitor listen
   pub fn listen(&self) -> MonitorResult<()> {
     println!("{:?}", self.config);
+    tracing::trace!(target: "alarmmgr", "{} config data: {:?}", logk::prefix_multi("test", vec!["config"]), self.config);
     Ok(())
   }
 }

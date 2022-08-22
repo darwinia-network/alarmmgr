@@ -2,7 +2,7 @@
 name = "alarmmgr-monitor"
 version = "0.0.1"
 authors = ["Darwinia Network <hello@darwinia.network>"]
-description = "Darwinia bridger"
+description = "Program monitor"
 repository = "https://github.com/darwinia-network/alarmmgr"
 license = "MIT"
 documentation = "https://rust-docs.darwinia.network/alarmmgr"
@@ -21,5 +21,6 @@ edition = "2021"
 thiserror = "1"
 tracing   = "0.1"
 
-alarmmgr-types = { path = "../types" }
+alarmmgr-types   = { path = "../types" }
+alarmmgr-toolkit = { path = "../toolkit", features = ["log"] }
 

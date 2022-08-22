@@ -1,5 +1,5 @@
 [package]
-name = "alarmmgr-types"
+name = "alarmmgr-toolkit"
 version = "0.0.1"
 authors = ["Darwinia Network <hello@darwinia.network>"]
 description = "Program monitor"
@@ -18,7 +18,9 @@ readme = 'README.md'
 edition = "2021"
 
 [dependencies]
+once_cell = { optional = true, version = "1" }
+pad       = { optional = true, version = "0.1" }
 
-dirs  = "4"
+[features]
+log     = ["once_cell", "pad"]
 
-serde = { version = "1", features = ["derive"] }
