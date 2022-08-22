@@ -1,5 +1,5 @@
 [package]
-name = "alarmmgr-bin"
+name = "alarmmgr-types"
 version = "0.0.1"
 authors = ["Darwinia Network <hello@darwinia.network>"]
 description = "Darwinia bridger"
@@ -17,14 +17,5 @@ keywords = ["monitor", "darwinia"]
 readme = 'README.md'
 edition = "2021"
 
-[[bin]]
-name = "alarmmgr"
-path = "src/main.rs"
-
 [dependencies]
-color-eyre = "0.6"
-
-sentry     = "0.27"
-structopt  = "0.3"
-
-alarmmgr-cli = { path = "../frame/cli" }
+serde = { version = "1", features = ["derive"] }

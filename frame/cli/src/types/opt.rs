@@ -1,6 +1,6 @@
 use structopt::StructOpt;
 
-use crate::command::types::StartOpt;
+use crate::types::StartCommand;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "alarmmgr", about = "Alarm manager")]
@@ -9,6 +9,6 @@ pub enum Opt {
   Start {
     /// Commands of start
     #[structopt(flatten)]
-    command: StartOpt,
+    command: StartCommand,
   },
 }

@@ -1,4 +1,5 @@
-use crate::command::handler;
+use alarmmgr_cli::handler;
+
 use crate::Opt;
 
 pub fn execute(opt: Opt) -> color_eyre::Result<()> {
@@ -11,6 +12,6 @@ pub fn execute(opt: Opt) -> color_eyre::Result<()> {
 
 fn run(opt: Opt) -> color_eyre::Result<()> {
   match opt {
-    Opt::Start { command } => handler::exec_start(command),
+    Opt::Start { command } => Ok(handler::exec_start(command)?),
   }
 }
