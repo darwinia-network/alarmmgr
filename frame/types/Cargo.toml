@@ -18,4 +18,7 @@ readme = 'README.md'
 edition = "2021"
 
 [dependencies]
+
+dirs  = "4"
+
 serde = { version = "1", features = ["derive"] }
