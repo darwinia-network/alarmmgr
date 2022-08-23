@@ -22,9 +22,15 @@ thiserror = "1"
 tracing   = "0.1"
 
 async-trait = "0.1"
-reqwest     = { version = "0.11", features = ["json", "rustls-tls"] }
+serde       = { version = "1", features = ["derive"] }
+reqwest     = { version = "0.11", features = ["json"] }  # "rustls-tls"
+
+substorager = { git = "https://github.com/fewensa/subalfred", branch = "client", features = ["codec"] }
 
 alarmmgr-types        = { path = "../types" }
 alarmmgr-toolkit      = { path = "../toolkit", features = ["log"] }
 alarmmgr-notification = { path = "../notification" }
 
+
+[dev-dependencies]
+array-bytes = "2"
