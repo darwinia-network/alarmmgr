@@ -4,12 +4,13 @@ use structopt::StructOpt;
 mod cli;
 mod initialize;
 
-fn main() -> color_eyre::Result<()> {
+#[tokio::main]
+async fn main() -> color_eyre::Result<()> {
   initialize::init()?;
 
   let ret: Result<Opt, structopt::clap::Error> = Opt::from_args_safe();
   match ret {
-    Ok(opt) => cli::execute(opt)?,
+    Ok(opt) => cli::execute(opt).await?,
     Err(e) => {
       e.exit();
     }

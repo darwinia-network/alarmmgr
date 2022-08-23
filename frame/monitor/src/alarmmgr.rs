@@ -17,9 +17,14 @@ impl AlarmmgrMonitor {
 
 impl AlarmmgrMonitor {
   /// monitor listen
-  pub fn listen(&self) -> MonitorResult<()> {
+  pub async fn listen(&self) -> MonitorResult<()> {
     println!("{:?}", self.config);
-    tracing::trace!(target: "alarmmgr", "{} config data: {:?}", logk::prefix_multi("test", vec!["config"]), self.config);
+    tracing::trace!(
+      target: "alarmmgr",
+      "{} config data: {:?}",
+      logk::prefix_multi("monitor", vec!["test"]),
+      self.config
+    );
     Ok(())
   }
 }

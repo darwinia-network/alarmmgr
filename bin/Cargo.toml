@@ -30,5 +30,6 @@ tracing-subscriber = { version = "0.2", features = ["chrono"] }
 
 sentry     = "0.27"
 structopt  = "0.3"
+tokio      = { version = "1", features = ["full"] }
 
 alarmmgr-cli = { path = "../frame/cli" }
