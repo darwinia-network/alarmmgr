@@ -21,7 +21,8 @@ edition = "2021"
 thiserror = "1"
 tracing   = "0.1"
 
-#tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
+reqwest     = { version = "0.11", features = ["json", "rustls-tls"] }
 
 alarmmgr-types        = { path = "../types" }
 alarmmgr-toolkit      = { path = "../toolkit", features = ["log"] }
