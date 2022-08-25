@@ -21,11 +21,17 @@ edition = "2021"
 thiserror = "1"
 tracing   = "0.1"
 
-async-trait = "0.1"
-serde       = { version = "1", features = ["derive"] }
-reqwest     = { version = "0.11", features = ["json"] }  # "rustls-tls"
+async-trait        = "0.1"
+serde              = { version = "1", features = ["derive"] }
+serde-hex          = "0.1"
+strum              = { version = "0.21", features = ["derive"] }
+reqwest            = { version = "0.11", features = ["json"] }  # "rustls-tls"
+serde_json         = "1"
+array-bytes        = "2"
+parity-scale-codec = { version = "3", features = ["derive"] }
 
 substorager = { git = "https://github.com/fewensa/subalfred", branch = "client", features = ["codec"] }
+subtypes    = { git = "https://github.com/fewensa/subalfred", branch = "client" }
 
 alarmmgr-types        = { path = "../types" }
 alarmmgr-toolkit      = { path = "../toolkit", features = ["log"] }
@@ -33,4 +39,3 @@ alarmmgr-notification = { path = "../notification" }
 
 
 [dev-dependencies]
-array-bytes = "2"

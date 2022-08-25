@@ -1,5 +1,6 @@
 use crate::error::MonitorResult;
-use crate::traits::{AlertInfo, MonitorProbe};
+use crate::traits::MonitorProbe;
+use crate::types::AlertInfo;
 
 pub use self::types::*;
 
@@ -16,7 +17,7 @@ impl BridgeEthv1Probe {
 
 #[async_trait::async_trait]
 impl MonitorProbe for BridgeEthv1Probe {
-  async fn probe(&self) -> MonitorResult<AlertInfo> {
+  async fn probe(&self) -> MonitorResult<Vec<AlertInfo>> {
     todo!()
   }
 }

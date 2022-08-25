@@ -5,5 +5,5 @@ use crate::types::NotifyMessage;
 #[async_trait::async_trait]
 pub trait AlarmmgrNotification {
   /// send notify message
-  async fn notify(message: NotifyMessage) -> NotificationResult<()>;
+  async fn notify(&self, message: NotifyMessage) -> NotificationResult<()>;
 }

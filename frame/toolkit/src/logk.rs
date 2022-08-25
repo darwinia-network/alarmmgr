@@ -30,6 +30,10 @@ fn get_len_arg_with_def(index: u32, def: usize) -> usize {
   }
 }
 
+pub fn prefix_single(mark: impl AsRef<str>) -> String {
+  prefix_multi(mark, Vec::<String>::new())
+}
+
 /// prefix multiple argument
 pub fn prefix_multi(mark: impl AsRef<str>, args: Vec<impl AsRef<str>>) -> String {
   let mark = mark.as_ref();

@@ -27,6 +27,9 @@ serde_json  = "1"
 
 slack-hook = { optional = true, version = "0.8" }
 
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
+
 [features]
 slack    = ["slack-hook"]
 maillist = []
