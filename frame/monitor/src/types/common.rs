@@ -2,6 +2,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
 
+use alarmmgr_notification::types::{AlertLevel, NotifyMessage};
+
 use crate::traits::ProbeReporter;
 use crate::types::ProbeMark;
 
@@ -49,6 +51,37 @@ impl ProbeReporter for AlertInfo {
       AlertInfo::P3 { mark, .. } => serde_json::to_string(mark),
     }
     .expect("Unreachable")
+  }
+}
+
+impl AlertInfo {
+  pub fn message(&self) -> Option<AlertMessage> {
+    match self {
+      AlertInfo::Normal { .. } => None,
+      AlertInfo::P1 { message, .. } => Some(message.clone()),
+      AlertInfo::P2 { message, .. } => Some(message.clone()),
+      AlertInfo::P3 { message, .. } => Some(message.clone()),
+    }
+  }
+
+  pub fn to_alert_level(&self) -> Option<AlertLevel> {
+    match self {
+      AlertInfo::Normal { .. } => None,
+      AlertInfo::P1 { .. } => Some(AlertLevel::P1),
+      AlertInfo::P2 { .. } => Some(AlertLevel::P2),
+      AlertInfo::P3 { .. } => Some(AlertLevel::P3),
+    }
+  }
+
+  pub fn to_notify_message(&self) -> Option<NotifyMessage> {
+    let mark = self.mark();
+    let level = self.to_alert_level();
+    self.message().map(|message| NotifyMessage {
+      title: message.title,
+      body: format!("[{}] {}", mark, message.body.unwrap_or_default()),
+      level,
+      slack: Default::default(),
+    })
   }
 }
 
