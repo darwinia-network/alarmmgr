@@ -4,6 +4,8 @@ use alarmmgr_monitor::rat::{
 use alarmmgr_monitor::AlarmmgrMonitor;
 use alarmmgr_notification::platform::slack::{SlackConfig, SlackNotification};
 
+use alarmmgr_toolkit::logk;
+
 use crate::error::CliResult;
 use crate::types::StartCommand;
 
@@ -12,7 +14,7 @@ pub async fn exec_start(command: StartCommand) -> CliResult<()> {
   let mut alarmmgr = AlarmmgrMonitor::new(config);
   add_probes(&mut alarmmgr);
   add_notifications(&mut alarmmgr);
-  alarmmgr.listen().await?;
+  listen(&alarmmgr).await;
   Ok(())
 }
 
@@ -33,4 +35,18 @@ fn add_notifications(alarmmgr: &mut AlarmmgrMonitor) {
   alarmmgr.notification(SlackNotification::new(SlackConfig {
     endpoint: "".to_string(),
   }));
+}
+
+async fn listen(alarmmgr: &AlarmmgrMonitor) {
+  loop {
+    if let Err(e) = alarmmgr.start().await {
+      tracing::error!(
+        target: "alarmmgr",
+        "{} monitor failed: {:?}",
+        logk::prefix_single("monitor"),
+        e,
+      );
+    }
+    tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+  }
 }

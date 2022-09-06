@@ -7,5 +7,5 @@ pub type NotificationResult<T> = Result<T, NotificationError>;
 pub enum NotificationError {
   #[cfg(feature = "slack")]
   #[error(transparent)]
-  Slack(#[from] slack_hook::Error),
+  Slack(#[from] slack_hook::SlackError),
 }

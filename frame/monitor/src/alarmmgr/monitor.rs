@@ -36,7 +36,7 @@ impl AlarmmgrMonitor {
   }
 
   /// monitor listen
-  pub async fn listen(&self) -> MonitorResult<()> {
+  pub async fn start(&self) -> MonitorResult<()> {
     for probe in &self.probes {
       let infos = probe.probe().await?;
       self.notify_infos(infos).await;
