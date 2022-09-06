@@ -35,10 +35,16 @@ impl FeemarketS2SProbe {
           "Not have assigned relayers for {} [{}]",
           self.config.chain, self.config.endpoint
         ))
-        .p1(ProbeMark::FeemarketS2sAssignedRelayers),
+        .p1(ProbeMark::feemarket_s2s_assigned_relayers(
+          &self.config.chain,
+        )),
       );
     }
-    Ok(AlertMessage::success().normal(ProbeMark::FeemarketS2sAssignedRelayers))
+    Ok(
+      AlertMessage::success().normal(ProbeMark::feemarket_s2s_assigned_relayers(
+        &self.config.chain,
+      )),
+    )
   }
 }
 

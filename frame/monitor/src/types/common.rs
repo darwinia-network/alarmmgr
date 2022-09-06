@@ -45,12 +45,11 @@ impl ProbeReporter for AlertInfo {
 
   fn mark(&self) -> String {
     match self {
-      AlertInfo::Normal { mark, .. } => serde_json::to_string(mark),
-      AlertInfo::P1 { mark, .. } => serde_json::to_string(mark),
-      AlertInfo::P2 { mark, .. } => serde_json::to_string(mark),
-      AlertInfo::P3 { mark, .. } => serde_json::to_string(mark),
+      AlertInfo::Normal { mark, .. } => mark.raw(),
+      AlertInfo::P1 { mark, .. } => mark.raw(),
+      AlertInfo::P2 { mark, .. } => mark.raw(),
+      AlertInfo::P3 { mark, .. } => mark.raw(),
     }
-    .expect("Unreachable")
   }
 }
 

@@ -31,7 +31,7 @@ impl BridgeS2SProbe {
       "{} check outbound lane",
       logk::prefix_single("monitor"),
     );
-    Ok(AlertMessage::success().normal(ProbeMark::Generic))
+    Ok(AlertMessage::success().normal(ProbeMark::generic_default()))
   }
 }
 

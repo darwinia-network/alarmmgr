@@ -21,6 +21,7 @@ edition = "2021"
 thiserror = "1"
 tracing   = "0.1"
 
+once_cell          = "1"
 async-trait        = "0.1"
 serde              = { version = "1", features = ["derive"] }
 serde-hex          = "0.1"
