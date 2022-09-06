@@ -5,6 +5,7 @@ use crate::error::MonitorResult;
 use crate::traits::MonitorProbe;
 
 /// alarmmgr monitor
+#[allow(dead_code)]
 pub struct AlarmmgrMonitor {
   pub(crate) config: Config,
   pub(crate) probes: Vec<Box<dyn MonitorProbe>>,
