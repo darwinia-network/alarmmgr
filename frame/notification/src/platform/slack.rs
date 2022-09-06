@@ -49,10 +49,9 @@ impl AlarmmgrNotification for SlackNotification {
       .build()
       .expect("Unreachable");
 
-    let json = serde_json::to_string(&p).unwrap();
-    // todo: change send to slack
-    println!("{}", json);
-    // slack.send(&p)?;
+    // let json = serde_json::to_string(&p).unwrap();
+    // println!("{}", json);
+    slack.send(&p).await?;
     Ok(())
   }
 }

@@ -7,6 +7,7 @@ use crate::types::{AlertInfo, AlertMessage, ProbeMark};
 pub use self::types::*;
 
 /// bridge S2S probe
+#[allow(dead_code)]
 pub struct BridgeS2SProbe {
   config: BridgeS2SProbeConfig,
 }

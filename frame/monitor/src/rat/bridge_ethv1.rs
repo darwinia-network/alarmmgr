@@ -5,6 +5,7 @@ use crate::types::AlertInfo;
 pub use self::types::*;
 
 /// bridge ethv1 probe
+#[allow(dead_code)]
 pub struct BridgeEthv1Probe {
   config: Ethv1ProbConfig,
 }

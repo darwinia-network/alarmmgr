@@ -5,6 +5,7 @@ use crate::error::MonitorResult;
 use crate::traits::MonitorProbe;
 
 /// alarmmgr monitor
+#[allow(dead_code)]
 pub struct AlarmmgrMonitor {
   pub(crate) config: Config,
   pub(crate) probes: Vec<Box<dyn MonitorProbe>>,
@@ -36,7 +37,7 @@ impl AlarmmgrMonitor {
   }
 
   /// monitor listen
-  pub async fn listen(&self) -> MonitorResult<()> {
+  pub async fn start(&self) -> MonitorResult<()> {
     for probe in &self.probes {
       let infos = probe.probe().await?;
       self.notify_infos(infos).await;
