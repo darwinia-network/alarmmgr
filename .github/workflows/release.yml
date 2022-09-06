@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - "v*"
+env:
+  OPENSSL_DIR: /home/runner/openssl
+  OPENSSL_STATIC: 1
 
 jobs:
   build-package:
@@ -32,8 +35,6 @@ jobs:
 
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
 
       - name: Build package
         run: cargo build --release --target x86_64-unknown-linux-gnu
