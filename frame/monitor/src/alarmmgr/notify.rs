@@ -118,7 +118,7 @@ impl AlarmmgrMonitor {
     match times {
       1 => ts + one_minutes * 2, // 2 mins
       2 => ts + one_minutes * 5,
-      3 => ts + one_minutes * 10,
+      3 => ts + one_minutes * 15,
       _ => 0,
     }
   }

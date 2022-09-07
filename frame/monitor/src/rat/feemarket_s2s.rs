@@ -1,5 +1,6 @@
 use substorager::StorageKey;
 
+use alarmmgr_notification::types::AlertLevel;
 use alarmmgr_toolkit::logk;
 
 use crate::client::Subclient;
@@ -35,26 +36,28 @@ impl FeemarketS2SProbe {
     );
 
     let client = Subclient::new(&self.config.endpoint)?;
-    let storage_key = StorageKey::builder(&self.config.pallet_name, "AssignedRelayers").build();
+    let storage_name = "AssignedRelayers";
+    let storage_key = StorageKey::builder(&self.config.pallet_name, storage_name).build();
     let relayers: Vec<FeeMarketRelayer> = client.storage(storage_key).await?.unwrap_or_default();
+
+    let mark = ProbeMark::FeemarketS2s {
+      chain: self.config.chain.clone(),
+    };
 
     // check if relayers is empty
     if relayers.is_empty() {
       return Ok(
-        AlertMessage::simple(format!(
-          "Not have assigned relayers for {} [{}]",
-          self.config.chain, self.config.endpoint
-        ))
-        .p1(ProbeMark::feemarket_s2s_assigned_relayers(
-          &self.config.chain,
-        )),
+        AlertMessage::simple(
+          AlertLevel::P1,
+          format!(
+            "[{}] [{}::{}] [{}] not have assigned relayers",
+            self.config.chain, self.config.pallet_name, storage_name, self.config.endpoint
+          ),
+        )
+        .to_alert_info(mark),
       );
     }
-    Ok(
-      AlertMessage::success().normal(ProbeMark::feemarket_s2s_assigned_relayers(
-        &self.config.chain,
-      )),
-    )
+    Ok(AlertMessage::success().to_alert_info(mark))
   }
 }
 

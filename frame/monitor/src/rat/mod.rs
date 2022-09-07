@@ -6,6 +6,7 @@ pub use self::subql_darwinia::*;
 pub use self::subql_subquery::*;
 pub use self::substrate_chain::*;
 
+mod _helpers;
 mod bridge_ethv1;
 mod bridge_ethv2;
 mod bridge_s2s;

@@ -1,12 +1,13 @@
-use substorager::StorageKey;
+use std::time::Duration;
 
-use alarmmgr_toolkit::{logk, timek};
+use substorager::{StorageHasher, StorageKey};
 
-use crate::client::Subclient;
+use alarmmgr_toolkit::logk;
+
 use crate::error::MonitorResult;
-use crate::storage;
+use crate::rat::_helpers::{CheckDataInput, SubstrateLikeCheck};
 use crate::traits::MonitorProbe;
-use crate::types::{AlertInfo, AlertMessage, ProbeMark};
+use crate::types::{AlertInfo, ProbeMark};
 
 pub use self::types::*;
 
@@ -33,8 +34,15 @@ impl MonitorProbe for BridgeS2SProbe {
 }
 
 impl BridgeS2SProbe {
-  fn client(&self) -> MonitorResult<Subclient> {
-    Subclient::new(&self.config.endpoint)
+  fn check_data_input(&self, storage_name: &str, storage_key: StorageKey) -> CheckDataInput {
+    CheckDataInput {
+      chain: self.config.chain.clone(),
+      pallet_name: self.config.pallet_name.clone(),
+      endpoint: self.config.endpoint.clone(),
+      storage_name: storage_name.to_string(),
+      storage_key,
+      allow_time: Duration::from_secs(5 * 60),
+    }
   }
 
   async fn check_grandpa(&self) -> MonitorResult<AlertInfo> {
@@ -43,42 +51,13 @@ impl BridgeS2SProbe {
       "{} ==> check grandpa",
       logk::prefix_multi("monitor", vec!["bridge-s2s", &self.config.chain]),
     );
-    let client = self.client()?;
-    let storage_key = StorageKey::builder(&self.config.pallet_name, "BestFinalized").build();
-    let best_target_head = client.storage_raw(storage_key).await?;
-    let store_name = format!("bridge-s2s-grandpa-{}", self.config.chain);
-    match best_target_head {
-      Some(best_finalized) => match storage::last_range_data(&store_name) {
-        Some(rs) => {
-          let time_range = timek::time_range_with_now(rs.time).as_secs();
-          if rs.last == best_finalized && timek::time_range_with_now(rs.time).as_secs() > 5 * 60 {
-            return Ok(
-              AlertMessage::simple(format!(
-                "[{}] [{}] [{}] the grandpa stopped {} seconds",
-                self.config.chain, self.config.pallet_name, self.config.endpoint, time_range,
-              ))
-              .p1(ProbeMark::BridgeS2sGrandpaEmptyBestTargetHead {
-                chain: self.config.chain.clone(),
-              }),
-            );
-          }
-          Ok(AlertMessage::success().normal_simple("bridge-s2s-grandpa"))
-        }
-        None => {
-          storage::store_last_range_data(&store_name, best_finalized);
-          Ok(AlertMessage::success().normal_simple("bridge-s2s-grandpa"))
-        }
-      },
-      None => Ok(
-        AlertMessage::simple(format!(
-          "[{}] [{}] [{}] not have best target chain head",
-          self.config.chain, self.config.pallet_name, self.config.endpoint
-        ))
-        .p3(ProbeMark::BridgeS2sGrandpaEmptyBestTargetHead {
-          chain: self.config.chain.clone(),
-        }),
-      ),
-    }
+    let storage_name = "BestFinalized";
+    let storage_key = StorageKey::builder(&self.config.pallet_name, storage_name).build();
+    let input = self.check_data_input(storage_name, storage_key);
+    let alert_message = SubstrateLikeCheck::check_storage_active(input).await?;
+    Ok(alert_message.to_alert_info(ProbeMark::BridgeS2sGrandpa {
+      chain: self.config.chain.clone(),
+    }))
   }
 
   async fn check_outbound_lane(&self) -> MonitorResult<AlertInfo> {
@@ -87,11 +66,15 @@ impl BridgeS2SProbe {
       "{} ==> check outbound lane",
       logk::prefix_multi("monitor", vec!["bridge-s2s", &self.config.chain]),
     );
-
-    let client = self.client()?;
-    let storage_key = StorageKey::builder(&self.config.pallet_name, "AssignedRelayers").build();
-
-    Ok(AlertMessage::success().normal(ProbeMark::generic_default()))
+    let storage_name = "OutboundLanes";
+    let storage_key = StorageKey::builder(&self.config.pallet_name, storage_name)
+      .param(StorageHasher::Blake2_128Concat, &self.config.lane_id)
+      .build();
+    let input = self.check_data_input(storage_name, storage_key);
+    let alert_message = SubstrateLikeCheck::check_storage_active(input).await?;
+    Ok(alert_message.to_alert_info(ProbeMark::BridgeS2sGrandpa {
+      chain: self.config.chain.clone(),
+    }))
   }
 }
 
