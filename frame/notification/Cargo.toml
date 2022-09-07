@@ -29,6 +29,7 @@ slack-hook = { optional = true, git = "https://github.com/fewensa/rust-slack" }
 
 term-table = { optional = true, version = "1" }
 colored    = { optional = true, version = "2" }
+chrono     = { optional = true, version = "0.4" }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["full"] }
@@ -36,4 +37,4 @@ tokio = { version = "1", features = ["full"] }
 [features]
 slack    = ["slack-hook"]
 maillist = []
-terminal = ["term-table", "colored"]
+terminal = ["term-table", "colored", "chrono"]

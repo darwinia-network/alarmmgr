@@ -1,3 +1,5 @@
+use chrono;
+use chrono::Utc;
 use colored::Colorize;
 use term_table::row::Row;
 use term_table::table_cell::{Alignment, TableCell};
@@ -23,8 +25,15 @@ impl AlarmmgrNotification for TerminalNotification {
 
     let level = message.level.map(|item| item.view()).unwrap_or_default();
 
+    let time = Utc::now();
+    let formatted_date = time.format("%Y-%m-%d %H:%M:%S");
     table.add_row(Row::new(vec![TableCell::new_with_alignment(
-      format!("[{}] {}", level.red(), message.title),
+      format!("[{}] {}", level.red(), formatted_date),
+      4,
+      Alignment::Left,
+    )]));
+    table.add_row(Row::new(vec![TableCell::new_with_alignment(
+      message.title,
       4,
       Alignment::Left,
     )]));

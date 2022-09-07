@@ -78,8 +78,9 @@ impl AlarmmgrMonitor {
     let mark = info.mark();
     let mut nm = NOTIFIED_MESSAGE.lock().expect("Unreachable");
 
-    match nm.get("mark") {
+    match nm.get(&mark[..]) {
       Some(m) => {
+        println!("========> {:?}", m);
         if m.notify_times > 3 {
           self.clean_notify(info);
           return false;
