@@ -54,7 +54,7 @@ jobs:
   build-docker-image:
     name: Build image
     runs-on: ubuntu-latest
-    needs: [ build-linux ]
+    needs: [ build-package ]
     steps:
       - uses: actions/checkout@v2
 
