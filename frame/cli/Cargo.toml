@@ -32,4 +32,4 @@ array-bytes = "2"
 alarmmgr-types        = { path = "../types" }
 alarmmgr-toolkit      = { path = "../toolkit", features = ["log"] }
 alarmmgr-monitor      = { path = "../monitor" }
-alarmmgr-notification = { path = "../notification", features = [ "slack" ] }
+alarmmgr-notification = { path = "../notification", features = ["slack", "terminal"] }

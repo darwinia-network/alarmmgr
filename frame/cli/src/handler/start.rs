@@ -3,7 +3,7 @@ use alarmmgr_monitor::rat::{
 };
 use alarmmgr_monitor::AlarmmgrMonitor;
 use alarmmgr_notification::platform::slack::{SlackConfig, SlackNotification};
-
+use alarmmgr_notification::platform::terminal::TerminalNotification;
 use alarmmgr_toolkit::logk;
 
 use crate::error::CliResult;
@@ -38,6 +38,7 @@ async fn listen(alarmmgr: &AlarmmgrMonitor) {
 }
 
 fn add_notifications(alarmmgr: &mut AlarmmgrMonitor) {
+  alarmmgr.notification(TerminalNotification);
   if let Ok(endpoint) = std::env::var("ALM_SLACK_ENDPOINT") {
     alarmmgr.notification(SlackNotification::new(SlackConfig { endpoint }));
     tracing::info!(
