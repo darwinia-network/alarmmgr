@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 pub enum ProbeMark {
   Generic { mark: String },
   BridgeS2sGrandpaEmptyBestTargetHead { chain: String },
+  BridgeS2sGrandpaStopped { chain: String },
   FeemarketS2sAssignedRelayers { chain: String },
 }
 
@@ -22,6 +23,9 @@ impl ProbeMark {
       Self::BridgeS2sGrandpaEmptyBestTargetHead { chain } => {
         format!("bridge-s2s-grandpa-empty-best-target-head-{}", chain)
       }
+      Self::BridgeS2sGrandpaStopped { chain } => {
+        format!("bridge-s2s-grandpa-stopped-{}", chain)
+      }
       Self::FeemarketS2sAssignedRelayers { chain } => {
         format!("feemarket-s2s-assigned-relayers-{}", chain)
       }
@@ -37,12 +41,6 @@ impl ProbeMark {
   pub fn generic(mark: impl AsRef<str>) -> Self {
     Self::Generic {
       mark: mark.as_ref().to_string(),
-    }
-  }
-
-  pub fn bridge_s2s_grandpa_empty_best_target_head(chain: impl AsRef<str>) -> Self {
-    Self::BridgeS2sGrandpaEmptyBestTargetHead {
-      chain: chain.as_ref().to_string(),
     }
   }
 

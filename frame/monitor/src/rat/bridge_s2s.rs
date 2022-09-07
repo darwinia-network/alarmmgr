@@ -48,41 +48,35 @@ impl BridgeS2SProbe {
     let best_target_head = client.storage_raw(storage_key).await?;
     let store_name = format!("bridge-s2s-grandpa-{}", self.config.chain);
     match best_target_head {
-      Some(best_finalized) => {
-        match storage::last_range_data(&store_name) {
-          Some(rs) => {
-            let time_range = timek::time_range_with_now(rs.time).as_secs();
-            if rs.last == best_finalized && timek::time_range_with_now(rs.time).as_secs() > 5 * 60 {
-              return Ok(
-                AlertMessage::simple(format!(
-                  "[{}] [{}] [{}] the grandpa stopped {} seconds",
-                  self.config.chain, self.config.pallet_name, self.config.endpoint, time_range,
-                ))
-                .p1(ProbeMark::bridge_s2s_grandpa_empty_best_target_head(
-                  &self.config.chain,
-                )),
-              );
-            }
-            Ok(AlertMessage::success().normal(
-              ProbeMark::bridge_s2s_grandpa_empty_best_target_head(&self.config.chain),
-            ))
+      Some(best_finalized) => match storage::last_range_data(&store_name) {
+        Some(rs) => {
+          let time_range = timek::time_range_with_now(rs.time).as_secs();
+          if rs.last == best_finalized && timek::time_range_with_now(rs.time).as_secs() > 5 * 60 {
+            return Ok(
+              AlertMessage::simple(format!(
+                "[{}] [{}] [{}] the grandpa stopped {} seconds",
+                self.config.chain, self.config.pallet_name, self.config.endpoint, time_range,
+              ))
+              .p1(ProbeMark::BridgeS2sGrandpaEmptyBestTargetHead {
+                chain: self.config.chain.clone(),
+              }),
+            );
           }
-          None => {
-            storage::store_last_range_data(&store_name, best_finalized);
-            Ok(AlertMessage::success().normal(
-              ProbeMark::bridge_s2s_grandpa_empty_best_target_head(&self.config.chain),
-            ))
-          }
+          Ok(AlertMessage::success().normal_simple("bridge-s2s-grandpa"))
         }
-      }
+        None => {
+          storage::store_last_range_data(&store_name, best_finalized);
+          Ok(AlertMessage::success().normal_simple("bridge-s2s-grandpa"))
+        }
+      },
       None => Ok(
         AlertMessage::simple(format!(
           "[{}] [{}] [{}] not have best target chain head",
           self.config.chain, self.config.pallet_name, self.config.endpoint
         ))
-        .p3(ProbeMark::bridge_s2s_grandpa_empty_best_target_head(
-          &self.config.chain,
-        )),
+        .p3(ProbeMark::BridgeS2sGrandpaEmptyBestTargetHead {
+          chain: self.config.chain.clone(),
+        }),
       ),
     }
   }

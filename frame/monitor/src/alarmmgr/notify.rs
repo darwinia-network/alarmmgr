@@ -58,7 +58,7 @@ impl AlarmmgrMonitor {
         }
       }
       None => {
-        tracing::trace!(
+        tracing::debug!(
           target: "alarmmgr",
           "{} not an alert message: {}",
           logk::prefix_multi("monitor", vec!["notify"]),

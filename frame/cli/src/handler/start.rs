@@ -53,7 +53,7 @@ fn add_probes(alarmmgr: &mut AlarmmgrMonitor) -> CliResult<()> {
   //# bridge s2s
   alarmmgr.probe(BridgeS2SProbe::new(BridgeS2SProbeConfig {
     endpoint: "https://pangoro-rpc.darwinia.network".to_string(),
-    chain: "pangoro".to_string(),
+    chain: "Pangoro".to_string(),
     lane_id: array_bytes::hex2array("0x726f6c69")?,
     pallet_name: "BridgePangolinGrandpa".to_string(),
   }));
@@ -61,7 +61,7 @@ fn add_probes(alarmmgr: &mut AlarmmgrMonitor) -> CliResult<()> {
   //# feemarket s2s
   alarmmgr.probe(FeemarketS2SProbe::new(FeemarketS2SProbeConfig {
     endpoint: "https://rpc.darwinia.network".to_string(),
-    chain: "darwinia".to_string(),
+    chain: "Darwinia".to_string(),
     pallet_name: "FeeMarket".to_string(),
   }));
   Ok(())

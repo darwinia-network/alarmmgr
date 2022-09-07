@@ -160,6 +160,9 @@ impl AlertMessage {
       mark,
     }
   }
+  pub fn normal_simple(&self, mark: impl AsRef<str>) -> AlertInfo {
+    self.normal(ProbeMark::generic(mark))
+  }
 }
 
 /// message origin
