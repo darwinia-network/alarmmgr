@@ -34,7 +34,7 @@ mod substrate_like {
 
   use crate::client::Subclient;
   use crate::error::MonitorResult;
-  use crate::rat::_helpers::check_out_time_range;
+  use crate::probes::_helpers::check_out_time_range;
   use crate::storage;
 
   pub struct SubstrateLikeCheck {}

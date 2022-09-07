@@ -1,4 +1,4 @@
-use alarmmgr_monitor::rat::{
+use alarmmgr_monitor::probes::{
   BridgeS2SProbe, BridgeS2SProbeConfig, FeemarketS2SProbe, FeemarketS2SProbeConfig,
 };
 use alarmmgr_monitor::AlarmmgrMonitor;

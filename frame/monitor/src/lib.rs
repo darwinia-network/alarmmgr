@@ -5,6 +5,6 @@ mod client;
 mod storage;
 
 pub mod error;
-pub mod rat;
+pub mod probes;
 pub mod traits;
 pub mod types;
