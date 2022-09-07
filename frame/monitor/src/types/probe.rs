@@ -7,6 +7,7 @@ pub enum ProbeMark {
   Generic { mark: String },
   BridgeS2sGrandpa { chain: String },
   FeemarketS2s { chain: String },
+  Subql { origin: String },
 }
 
 impl Default for ProbeMark {
@@ -25,6 +26,7 @@ impl ProbeMark {
       Self::FeemarketS2s { chain } => {
         format!("feemarket-s2s-{}", chain)
       }
+      Self::Subql { origin } => format!("subql-{}", origin),
     }
   }
 }

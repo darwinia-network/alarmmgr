@@ -31,7 +31,7 @@ impl FeemarketS2SProbe {
   async fn check_feemarket_assigned_relays(&self) -> MonitorResult<AlertInfo> {
     tracing::trace!(
       target: "alarmmgr",
-      "{} ==> check feemarket",
+      "{} ==> check feemarket s2s",
       logk::prefix_multi("monitor", vec!["feemarket-s2s", &self.config.chain]),
     );
 
