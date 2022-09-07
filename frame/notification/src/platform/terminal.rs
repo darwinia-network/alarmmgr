@@ -1,3 +1,4 @@
+use colored::Colorize;
 use term_table::row::Row;
 use term_table::table_cell::{Alignment, TableCell};
 use term_table::{Table, TableStyle};
@@ -23,7 +24,7 @@ impl AlarmmgrNotification for TerminalNotification {
     let level = message.level.map(|item| item.view()).unwrap_or_default();
 
     table.add_row(Row::new(vec![TableCell::new_with_alignment(
-      format!("[{}] {}", level, message.title),
+      format!("[{}] {}", level.red(), message.title),
       4,
       Alignment::Left,
     )]));
