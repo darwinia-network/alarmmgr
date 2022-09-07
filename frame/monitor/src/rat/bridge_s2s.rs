@@ -1,13 +1,14 @@
 use std::time::Duration;
 
+use alarmmgr_notification::types::AlertLevel;
 use substorager::{StorageHasher, StorageKey};
 
 use alarmmgr_toolkit::logk;
 
 use crate::error::MonitorResult;
-use crate::rat::_helpers::{CheckDataInput, SubstrateLikeCheck};
+use crate::rat::_helpers::{CheckDataInput, CheckedActiveType, SubstrateLikeCheck};
 use crate::traits::MonitorProbe;
-use crate::types::{AlertInfo, ProbeMark};
+use crate::types::{AlertInfo, AlertMessage, ProbeMark};
 
 pub use self::types::*;
 
@@ -34,12 +35,14 @@ impl MonitorProbe for BridgeS2SProbe {
 }
 
 impl BridgeS2SProbe {
-  fn check_data_input(&self, storage_name: &str, storage_key: StorageKey) -> CheckDataInput {
+  fn check_data_input(
+    &self,
+    cache_name: impl AsRef<str>,
+    storage_key: StorageKey,
+  ) -> CheckDataInput {
     CheckDataInput {
-      chain: self.config.chain.clone(),
-      pallet_name: self.config.pallet_name.clone(),
+      cache_name: cache_name.as_ref().to_string(),
       endpoint: self.config.endpoint.clone(),
-      storage_name: storage_name.to_string(),
       storage_key,
       allow_time: Duration::from_secs(5 * 60),
     }
@@ -52,9 +55,31 @@ impl BridgeS2SProbe {
       logk::prefix_multi("monitor", vec!["bridge-s2s", &self.config.chain]),
     );
     let storage_name = "BestFinalized";
-    let storage_key = StorageKey::builder(&self.config.pallet_name, storage_name).build();
-    let input = self.check_data_input(storage_name, storage_key);
-    let alert_message = SubstrateLikeCheck::check_storage_active(input).await?;
+    let cache_name = format!("bridge-s2s-grandpa-{}", self.config.chain);
+    let storage_key = StorageKey::builder(&self.config.pallet_grandpa, storage_name).build();
+    let input = self.check_data_input(cache_name, storage_key);
+    let checked_active_type = SubstrateLikeCheck::check_storage_active(input).await?;
+    let alert_message = match checked_active_type {
+      CheckedActiveType::Pass => AlertMessage::success(),
+      CheckedActiveType::NoData => AlertMessage::simple(
+        AlertLevel::P3,
+        format!(
+          "[{}] [{}::{}] [{}] not have best target chain head",
+          self.config.chain, self.config.pallet_grandpa, storage_name, self.config.endpoint
+        ),
+      ),
+      CheckedActiveType::Dead { out_time } => AlertMessage::simple(
+        AlertLevel::P1,
+        format!(
+          "[{}] [{}::{}] [{}] the grandpa stopped {} seconds",
+          self.config.chain,
+          self.config.pallet_grandpa,
+          storage_name,
+          self.config.endpoint,
+          out_time.as_secs(),
+        ),
+      ),
+    };
     Ok(alert_message.to_alert_info(ProbeMark::BridgeS2sGrandpa {
       chain: self.config.chain.clone(),
     }))
@@ -67,14 +92,38 @@ impl BridgeS2SProbe {
       logk::prefix_multi("monitor", vec!["bridge-s2s", &self.config.chain]),
     );
     let storage_name = "OutboundLanes";
-    let storage_key = StorageKey::builder(&self.config.pallet_name, storage_name)
+    let cache_name = format!("bridge-s2s-outbound-lane-{}", self.config.chain);
+    let storage_key = StorageKey::builder(&self.config.pallet_message, storage_name)
       .param(StorageHasher::Blake2_128Concat, &self.config.lane_id)
       .build();
-    let input = self.check_data_input(storage_name, storage_key);
-    let alert_message = SubstrateLikeCheck::check_storage_active(input).await?;
-    Ok(alert_message.to_alert_info(ProbeMark::BridgeS2sGrandpa {
-      chain: self.config.chain.clone(),
-    }))
+    let input = self.check_data_input(cache_name, storage_key);
+    let checked_active_type = SubstrateLikeCheck::check_storage_active(input).await?;
+    let alert_message = match checked_active_type {
+      CheckedActiveType::Pass => AlertMessage::success(),
+      CheckedActiveType::NoData => AlertMessage::simple(
+        AlertLevel::P3,
+        format!(
+          "[{}] [{}::{}] [{}] not have outbound lane data",
+          self.config.chain, self.config.pallet_message, storage_name, self.config.endpoint
+        ),
+      ),
+      CheckedActiveType::Dead { out_time } => AlertMessage::simple(
+        AlertLevel::P1,
+        format!(
+          "[{}] [{}::{}] [{}] maybe the bridger stopped {} seconds",
+          self.config.chain,
+          self.config.pallet_message,
+          storage_name,
+          self.config.endpoint,
+          out_time.as_secs(),
+        ),
+      ),
+    };
+    Ok(
+      alert_message.to_alert_info(ProbeMark::BridgeS2sOutboundLane {
+        chain: self.config.chain.clone(),
+      }),
+    )
   }
 }
 
@@ -87,7 +136,8 @@ mod types {
     pub endpoint: String,
     pub chain: String,
     pub lane_id: [u8; 4],
-    pub pallet_name: String,
+    pub pallet_grandpa: String,
+    pub pallet_message: String,
   }
 
   /// outbound lane data

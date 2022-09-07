@@ -55,7 +55,8 @@ fn add_probes(alarmmgr: &mut AlarmmgrMonitor) -> CliResult<()> {
     endpoint: "https://pangoro-rpc.darwinia.network".to_string(),
     chain: "Pangoro".to_string(),
     lane_id: array_bytes::hex2array("0x726f6c69")?,
-    pallet_name: "BridgePangolinGrandpa".to_string(),
+    pallet_grandpa: "BridgePangolinGrandpa".to_string(),
+    pallet_message: "BridgePangolinMessages".to_string(),
   }));
 
   //# feemarket s2s

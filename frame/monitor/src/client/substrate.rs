@@ -5,7 +5,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use substorager::StorageKey;
 
-// use alarmmgr_toolkit::logk;
+use alarmmgr_toolkit::logk;
 
 use crate::error::MonitorResult;
 
@@ -51,13 +51,13 @@ impl Subclient {
       r#"{{"id":1,"jsonrpc":"2.0","method":"state_getStorage","params":["{}"]}}"#,
       param
     );
-    // tracing::trace!(
-    //   target: "alarmmgr",
-    //   "{} --> [{}] {}",
-    //   logk::prefix_single("subclient"),
-    //   self.endpoint,
-    //   reqbody,
-    // );
+    tracing::trace!(
+      target: "alarmmgr",
+      "{} --> [{}] {}",
+      logk::prefix_single("subclient"),
+      self.endpoint,
+      reqbody,
+    );
     let response = self
       .client
       .post(&self.endpoint)
@@ -66,13 +66,13 @@ impl Subclient {
       .send()
       .await?;
     let respbody = response.text().await?;
-    // tracing::trace!(
-    //   target: "alarmmgr",
-    //   "{} <-- [{}] {}",
-    //   logk::prefix_single("subclient"),
-    //   self.endpoint,
-    //   respbody,
-    // );
+    tracing::trace!(
+      target: "alarmmgr",
+      "{} <-- [{}] {}",
+      logk::prefix_single("subclient"),
+      self.endpoint,
+      respbody,
+    );
     Ok(serde_json::from_str(&respbody)?)
   }
 

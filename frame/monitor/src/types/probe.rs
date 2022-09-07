@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 pub enum ProbeMark {
   Generic { mark: String },
   BridgeS2sGrandpa { chain: String },
+  BridgeS2sOutboundLane { chain: String },
   FeemarketS2s { chain: String },
   Subql { origin: String },
 }
@@ -23,6 +24,7 @@ impl ProbeMark {
       Self::BridgeS2sGrandpa { chain } => {
         format!("bridge-s2s-grandpa-{}", chain)
       }
+      Self::BridgeS2sOutboundLane { chain } => format!("bridge-s2s-outbound-lane-{}", chain),
       Self::FeemarketS2s { chain } => {
         format!("feemarket-s2s-{}", chain)
       }
