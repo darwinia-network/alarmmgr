@@ -80,7 +80,6 @@ impl AlarmmgrMonitor {
 
     match nm.get(&mark[..]) {
       Some(m) => {
-        println!("========> {:?}", m);
         if m.notify_times > 3 {
           self.clean_notify(info);
           return false;
