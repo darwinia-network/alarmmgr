@@ -1,5 +1,7 @@
 use substorager::StorageKey;
 
+use alarmmgr_toolkit::logk;
+
 use crate::client::Subclient;
 use crate::error::MonitorResult;
 use crate::traits::MonitorProbe;
@@ -26,9 +28,17 @@ impl MonitorProbe for FeemarketS2SProbe {
 
 impl FeemarketS2SProbe {
   async fn check_feemarket_assigned_relays(&self) -> MonitorResult<AlertInfo> {
+    tracing::trace!(
+      target: "alarmmgr",
+      "{} ==> check feemarket",
+      logk::prefix_multi("monitor", vec!["feemarket-s2s", &self.config.chain]),
+    );
+
     let client = Subclient::new(&self.config.endpoint)?;
     let storage_key = StorageKey::builder(&self.config.pallet_name, "AssignedRelayers").build();
     let relayers: Vec<FeeMarketRelayer> = client.storage(storage_key).await?.unwrap_or_default();
+
+    // check if relayers is empty
     if relayers.is_empty() {
       return Ok(
         AlertMessage::simple(format!(

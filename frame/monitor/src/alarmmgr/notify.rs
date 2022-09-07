@@ -1,9 +1,9 @@
-use std::time::{SystemTime, UNIX_EPOCH};
 use std::{collections::HashMap, sync::Mutex};
 
+use alarmmgr_notification::types::SlackMessageDetail;
 use once_cell::sync::Lazy;
 
-use alarmmgr_toolkit::logk;
+use alarmmgr_toolkit::{logk, timek};
 
 use crate::alarmmgr::types::NotifiedMessage;
 use crate::traits::ProbeReporter;
@@ -22,24 +22,36 @@ impl AlarmmgrMonitor {
 
   async fn notify_info(&self, info: &AlertInfo) {
     match info.to_notify_message() {
-      Some(message) => {
+      Some(mut message) => {
+        message.slack = self.config.slack.clone().map(|item| SlackMessageDetail {
+          channel: item.channel,
+          icon_emoji: item.icon_emoji,
+        });
+
         let is_notify = self.check_and_store_notify(info);
+        tracing::trace!(
+          target: "alarmmgr",
+          "{} new alert info [{}]: {}",
+          logk::prefix_multi("monitor", vec!["notify"]),
+          info.mark(),
+          info.message().map(|m| format!("{} {}", m.title, m.body.unwrap_or_default())).unwrap_or_default(),
+        );
         if !is_notify {
           return;
         }
         for notification in &self.notifications {
           tracing::trace!(
-              target: "alarmmgr",
-              "{} send message to [{}]: {}",
-              logk::prefix_single("monitor"),
-              notification.name(),
-              serde_json::to_string(info).expect("Unreachable"),
+            target: "alarmmgr",
+            "{} send message to [{}]: {}",
+            logk::prefix_multi("monitor", vec!["notify"]),
+            notification.name(),
+            serde_json::to_string(info).expect("Unreachable"),
           );
           if let Err(e) = notification.notify(message.clone()).await {
             tracing::error!(
               target: "alarmmgr",
               "{} failed to send notification: {:?}",
-              logk::prefix_single("monitor"),
+              logk::prefix_multi("monitor", vec!["notify"]),
               e,
             );
           }
@@ -49,7 +61,7 @@ impl AlarmmgrMonitor {
         tracing::trace!(
           target: "alarmmgr",
           "{} not an alert message: {}",
-          logk::prefix_single("monitor"),
+          logk::prefix_multi("monitor", vec!["notify"]),
           serde_json::to_string(info).expect("Unreachable"),
         );
       }
@@ -72,12 +84,12 @@ impl AlarmmgrMonitor {
           self.clean_notify(info);
           return false;
         }
-        let now = self.timestamp();
+        let now = timek::timestamp();
         if now <= m.time_next {
           tracing::info!(
             target: "alarmmgr",
             "{} The last notification cycle is still valid",
-            logk::prefix_single("monitor"),
+            logk::prefix_multi("monitor", vec!["notify"]),
           );
           return false;
         }
@@ -90,7 +102,7 @@ impl AlarmmgrMonitor {
       }
       None => {
         let notified_message = NotifiedMessage {
-          time_notified: self.timestamp(),
+          time_notified: timek::timestamp(),
           time_next: self.next_notify_timestamp(1),
           notify_times: 1,
         };
@@ -100,16 +112,8 @@ impl AlarmmgrMonitor {
     }
   }
 
-  fn timestamp(&self) -> u128 {
-    let start = SystemTime::now();
-    let since_the_epoch = start
-      .duration_since(UNIX_EPOCH)
-      .expect("Time went backwards");
-    since_the_epoch.as_millis()
-  }
-
   fn next_notify_timestamp(&self, times: u32) -> u128 {
-    let ts = self.timestamp();
+    let ts = timek::timestamp();
     let one_minutes = 1000 * 60;
     match times {
       1 => ts + one_minutes * 2, // 2 mins

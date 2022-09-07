@@ -37,7 +37,7 @@ impl AlarmmgrNotification for SlackNotification {
           .color("#b13d41")
           .build()
           .expect("Unreachable"),
-        AttachmentBuilder::new(format!("Priority: {}", level))
+        AttachmentBuilder::new("")
           .fields(vec![Field::new("Priority", SlackText::new(level), None)])
           .build()
           .expect("Unreachable"),

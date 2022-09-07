@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
-use alarmmgr_types::config::Config;
+use alarmmgr_types::config::{Config, SlackNotificationInfo};
 use alarmmgr_types::constants;
 
 use crate::error::CliError;
@@ -30,6 +30,10 @@ impl TryFrom<StartCommand> for Config {
     Ok(Self {
       enable_api: command.enable_api,
       base_path,
+      slack: Some(SlackNotificationInfo {
+        channel: "darwinia-alert-notification".to_string(),
+        icon_emoji: None,
+      }),
     })
   }
 }
