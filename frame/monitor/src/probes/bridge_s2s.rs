@@ -101,7 +101,7 @@ impl BridgeS2SProbe {
     let outbound_lane_data: Option<OutboundLaneData> = client.storage(&storage_key).await?;
     match outbound_lane_data {
       Some(lane_data) => {
-        if lane_data.latest_generated_nonce == lane_data.latest_generated_nonce {
+        if lane_data.latest_generated_nonce == lane_data.latest_received_nonce {
           return Ok(
             AlertMessage::success().to_alert_info(ProbeMark::BridgeS2sOutboundLane {
               chain: self.config.bridge.clone(),
