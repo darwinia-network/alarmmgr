@@ -43,7 +43,7 @@ mod substrate_like {
     /// check substrate chain storage not changed long time
     pub async fn check_storage_active(input: CheckDataInput) -> MonitorResult<CheckedActiveType> {
       let client = Subclient::new(&input.endpoint)?;
-      let storage_result = client.storage_raw(input.storage_key).await?;
+      let storage_result = client.storage_raw(&input.storage_key).await?;
       if storage_result.is_none() {
         return Ok(CheckedActiveType::NoData);
       }

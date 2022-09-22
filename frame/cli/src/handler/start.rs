@@ -51,14 +51,126 @@ fn add_notifications(alarmmgr: &mut AlarmmgrMonitor) {
 
 fn add_probes(alarmmgr: &mut AlarmmgrMonitor) -> CliResult<()> {
   //# bridge s2s
-  alarmmgr.probe(BridgeS2SProbe::new(BridgeS2SProbeConfig {
-    endpoint: "https://pangoro-rpc.darwinia.network".to_string(),
-    chain: "Pangoro".to_string(),
-    lane_id: array_bytes::hex2array("0x726f6c69")?,
-    pallet_grandpa: "BridgePangolinGrandpa".to_string(),
-    pallet_message: "BridgePangolinMessages".to_string(),
-  }));
+  let configs_bridge_s2s = vec![
+    // pangoro -> pangolin
+    BridgeS2SProbeConfig {
+      endpoint: "https://pangoro-rpc.darwinia.network".to_string(),
+      chain: "Pangoro".to_string(),
+      lane_id: array_bytes::hex2array("0x726f6c69")?,
+      pallet_grandpa: "BridgePangolinGrandpa".to_string(),
+      pallet_message: "BridgePangolinMessages".to_string(),
+    },
+    // pangolin -> pangoro
+    BridgeS2SProbeConfig {
+      endpoint: "https://pangolin-rpc.darwinia.network".to_string(),
+      chain: "Pangolin".to_string(),
+      lane_id: array_bytes::hex2array("0x726f6c69")?,
+      pallet_grandpa: "BridgePangoroGrandpa".to_string(),
+      pallet_message: "BridgePangoroMessages".to_string(),
+    },
+    // pangolin -> pangolin parachain
+    BridgeS2SProbeConfig {
+      endpoint: "https://pangolin-rpc.darwinia.network".to_string(),
+      chain: "Pangolin".to_string(),
+      lane_id: array_bytes::hex2array("0x70616c69")?,
+      pallet_grandpa: "BridgeRococoGrandpa".to_string(),
+      pallet_message: "BridgePangolinParachainMessages".to_string(),
+    },
+    // pangolin parachain -> pangolin
+    BridgeS2SProbeConfig {
+      endpoint: "https://pangolin-parachain-rpc.darwinia.network".to_string(),
+      chain: "PangolinParachain".to_string(),
+      lane_id: array_bytes::hex2array("0x70616c69")?,
+      pallet_grandpa: "BridgePangolinGrandpa".to_string(),
+      pallet_message: "BridgePangolinMessages".to_string(),
+    },
+    // darwinia -> crab
+    BridgeS2SProbeConfig {
+      endpoint: "https://rpc.darwinia.network".to_string(),
+      chain: "Darwinia".to_string(),
+      lane_id: array_bytes::hex2array("0x00000000")?,
+      pallet_grandpa: "BridgeCrabGrandpa".to_string(),
+      pallet_message: "BridgeCrabMessages".to_string(),
+    },
+    // crab -> darwinia
+    BridgeS2SProbeConfig {
+      endpoint: "https://crab-rpc.darwinia.network".to_string(),
+      chain: "Crab".to_string(),
+      lane_id: array_bytes::hex2array("0x00000000")?,
+      pallet_grandpa: "BridgeDarwiniaGrandpa".to_string(),
+      pallet_message: "BridgeDarwiniaMessages".to_string(),
+    },
+    // crab -> crab parachain
+    BridgeS2SProbeConfig {
+      endpoint: "https://crab-rpc.darwinia.network".to_string(),
+      chain: "Crab".to_string(),
+      lane_id: array_bytes::hex2array("0x70616372")?,
+      pallet_grandpa: "BridgeKusamaGrandpa".to_string(),
+      pallet_message: "BridgeCrabParachainMessages".to_string(),
+    },
+    // crab parachain -> crab
+    BridgeS2SProbeConfig {
+      endpoint: "https://crab-parachain-rpc.darwinia.network".to_string(),
+      chain: "CrabParachain".to_string(),
+      lane_id: array_bytes::hex2array("0x70616372")?,
+      pallet_grandpa: "BridgeCrabGrandpa".to_string(),
+      pallet_message: "BridgeCrabMessages".to_string(),
+    },
+  ];
+  for probe_config in configs_bridge_s2s {
+    alarmmgr.probe(BridgeS2SProbe::new(probe_config));
+  }
 
+  let config_feemarket_s2s = vec![
+    // dawrinia -> crab
+    FeemarketS2SProbeConfig {
+      endpoint: "https://rpc.darwinia.network".to_string(),
+      chain: "Darwinia".to_string(),
+      pallet_name: "FeeMarket".to_string(),
+    },
+    // crab -> dawrinia
+    FeemarketS2SProbeConfig {
+      endpoint: "https://crab-rpc.darwinia.network".to_string(),
+      chain: "Crab".to_string(),
+      pallet_name: "DarwiniaFeeMarket".to_string(),
+    },
+    // pangolin -> pangoro
+    FeemarketS2SProbeConfig {
+      endpoint: "https://pangolin-rpc.darwinia.network".to_string(),
+      chain: "Pangolin".to_string(),
+      pallet_name: "PangoroFeeMarket".to_string(),
+    },
+    // pangoro -> pangolin
+    FeemarketS2SProbeConfig {
+      endpoint: "https://pangoro-rpc.darwinia.network".to_string(),
+      chain: "Pangoro".to_string(),
+      pallet_name: "PangolinFeeMarket".to_string(),
+    },
+    // pangolin -> pangolin parachain
+    FeemarketS2SProbeConfig {
+      endpoint: "https://pangolin-rpc.darwinia.network".to_string(),
+      chain: "Pangolin".to_string(),
+      pallet_name: "PangolinParachainFeeMarket".to_string(),
+    },
+    // pangolin parachain -> pangolin
+    FeemarketS2SProbeConfig {
+      endpoint: "https://pangolin-parachain-rpc.darwinia.network".to_string(),
+      chain: "PangolinParachain".to_string(),
+      pallet_name: "PangolinFeeMarket".to_string(),
+    },
+    // crab -> crab parachain
+    FeemarketS2SProbeConfig {
+      endpoint: "https://crab-rpc.darwinia.network".to_string(),
+      chain: "Crab".to_string(),
+      pallet_name: "CrabParachainFeeMarket".to_string(),
+    },
+    // crab parachain -> crab
+    FeemarketS2SProbeConfig {
+      endpoint: "https://crab-parachain-rpc.darwinia.network".to_string(),
+      chain: "CrabParachain".to_string(),
+      pallet_name: "CrabFeeMarket".to_string(),
+    },
+  ];
   //# feemarket s2s
   alarmmgr.probe(FeemarketS2SProbe::new(FeemarketS2SProbeConfig {
     endpoint: "https://rpc.darwinia.network".to_string(),
