@@ -38,7 +38,7 @@ impl FeemarketS2SProbe {
     let client = Subclient::new(&self.config.endpoint)?;
     let storage_name = "AssignedRelayers";
     let storage_key = StorageKey::builder(&self.config.pallet_name, storage_name).build();
-    let relayers: Vec<FeeMarketRelayer> = client.storage(storage_key).await?.unwrap_or_default();
+    let relayers: Vec<FeeMarketRelayer> = client.storage(&storage_key).await?.unwrap_or_default();
 
     let mark = ProbeMark::FeemarketS2s {
       chain: self.config.bridge.clone(),
