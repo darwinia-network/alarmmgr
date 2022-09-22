@@ -32,7 +32,7 @@ impl FeemarketS2SProbe {
     tracing::trace!(
       target: "alarmmgr",
       "{} ==> check feemarket s2s",
-      logk::prefix_multi("monitor", vec!["feemarket-s2s", &self.config.chain]),
+      logk::prefix_multi("monitor", vec!["feemarket-s2s", &self.config.bridge]),
     );
 
     let client = Subclient::new(&self.config.endpoint)?;
@@ -41,7 +41,7 @@ impl FeemarketS2SProbe {
     let relayers: Vec<FeeMarketRelayer> = client.storage(storage_key).await?.unwrap_or_default();
 
     let mark = ProbeMark::FeemarketS2s {
-      chain: self.config.chain.clone(),
+      chain: self.config.bridge.clone(),
     };
 
     // check if relayers is empty
@@ -51,7 +51,7 @@ impl FeemarketS2SProbe {
           AlertLevel::P1,
           format!(
             "[{}] [{}::{}] [{}] not have assigned relayers",
-            self.config.chain, self.config.pallet_name, storage_name, self.config.endpoint
+            self.config.bridge, self.config.pallet_name, storage_name, self.config.endpoint
           ),
         )
         .to_alert_info(mark),
@@ -69,7 +69,7 @@ mod types {
   #[derive(Clone, Debug, Deserialize, Serialize)]
   pub struct FeemarketS2SProbeConfig {
     pub endpoint: String,
-    pub chain: String,
+    pub bridge: String,
     pub pallet_name: String,
   }
 

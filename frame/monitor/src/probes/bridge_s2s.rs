@@ -53,10 +53,10 @@ impl BridgeS2SProbe {
     tracing::trace!(
       target: "alarmmgr",
       "{} ==> check grandpa",
-      logk::prefix_multi("monitor", vec!["bridge-s2s", &self.config.chain]),
+      logk::prefix_multi("monitor", vec!["bridge-s2s", &self.config.bridge]),
     );
     let storage_name = "BestFinalized";
-    let cache_name = format!("bridge-s2s-grandpa-{}", self.config.chain);
+    let cache_name = format!("bridge-s2s-grandpa-{}", self.config.bridge);
     let storage_key = StorageKey::builder(&self.config.pallet_grandpa, storage_name).build();
     let input = self.check_data_input(cache_name, storage_key);
     let checked_active_type = SubstrateLikeCheck::check_storage_active(input).await?;
@@ -66,14 +66,14 @@ impl BridgeS2SProbe {
         AlertLevel::P3,
         format!(
           "[{}] [{}::{}] [{}] not have best target chain head",
-          self.config.chain, self.config.pallet_grandpa, storage_name, self.config.endpoint
+          self.config.bridge, self.config.pallet_grandpa, storage_name, self.config.endpoint
         ),
       ),
       CheckedActiveType::Dead { out_time } => AlertMessage::simple(
         AlertLevel::P1,
         format!(
           "[{}] [{}::{}] [{}] the grandpa stopped {} seconds",
-          self.config.chain,
+          self.config.bridge,
           self.config.pallet_grandpa,
           storage_name,
           self.config.endpoint,
@@ -82,7 +82,7 @@ impl BridgeS2SProbe {
       ),
     };
     Ok(alert_message.to_alert_info(ProbeMark::BridgeS2sGrandpa {
-      chain: self.config.chain.clone(),
+      chain: self.config.bridge.clone(),
     }))
   }
 
@@ -90,10 +90,10 @@ impl BridgeS2SProbe {
     tracing::trace!(
       target: "alarmmgr",
       "{} ==> check outbound lane",
-      logk::prefix_multi("monitor", vec!["bridge-s2s", &self.config.chain]),
+      logk::prefix_multi("monitor", vec!["bridge-s2s", &self.config.bridge]),
     );
     let storage_name = "OutboundLanes";
-    let cache_name = format!("bridge-s2s-outbound-lane-{}", self.config.chain);
+    let cache_name = format!("bridge-s2s-outbound-lane-{}", self.config.bridge);
     let storage_key = StorageKey::builder(&self.config.pallet_message, storage_name)
       .param(StorageHasher::Blake2_128Concat, &self.config.lane_id)
       .build();
@@ -104,7 +104,7 @@ impl BridgeS2SProbe {
         if lane_data.latest_generated_nonce == lane_data.latest_generated_nonce {
           return Ok(
             AlertMessage::success().to_alert_info(ProbeMark::BridgeS2sOutboundLane {
-              chain: self.config.chain.clone(),
+              chain: self.config.bridge.clone(),
             }),
           );
         }
@@ -112,7 +112,7 @@ impl BridgeS2SProbe {
       None => {
         return Ok(
           AlertMessage::success().to_alert_info(ProbeMark::BridgeS2sOutboundLane {
-            chain: self.config.chain.clone(),
+            chain: self.config.bridge.clone(),
           }),
         )
       }
@@ -125,14 +125,14 @@ impl BridgeS2SProbe {
         AlertLevel::P3,
         format!(
           "[{}] [{}::{}] [{}] not have outbound lane data",
-          self.config.chain, self.config.pallet_message, storage_name, self.config.endpoint
+          self.config.bridge, self.config.pallet_message, storage_name, self.config.endpoint
         ),
       ),
       CheckedActiveType::Dead { out_time } => AlertMessage::simple(
         AlertLevel::P1,
         format!(
           "[{}] [{}::{}] [{}] maybe the bridger stopped {} seconds",
-          self.config.chain,
+          self.config.bridge,
           self.config.pallet_message,
           storage_name,
           self.config.endpoint,
@@ -142,7 +142,7 @@ impl BridgeS2SProbe {
     };
     Ok(
       alert_message.to_alert_info(ProbeMark::BridgeS2sOutboundLane {
-        chain: self.config.chain.clone(),
+        chain: self.config.bridge.clone(),
       }),
     )
   }
@@ -156,7 +156,7 @@ mod types {
   #[derive(Clone, Debug, Deserialize, Serialize)]
   pub struct BridgeS2SProbeConfig {
     pub endpoint: String,
-    pub chain: String,
+    pub bridge: String,
     pub lane_id: [u8; 4],
     pub pallet_grandpa: String,
     pub pallet_message: String,
