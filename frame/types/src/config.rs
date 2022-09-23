@@ -8,4 +8,13 @@ pub struct Config {
   pub enable_api: bool,
   /// config base path
   pub base_path: PathBuf,
+
+  /// slack message details
+  pub slack: Option<SlackNotificationInfo>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SlackNotificationInfo {
+  pub channel: String,
+  pub icon_emoji: Option<String>,
 }

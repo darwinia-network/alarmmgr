@@ -45,8 +45,7 @@ impl Subclient {
 }
 
 impl Subclient {
-  /// query storage
-  pub async fn storage<R: Decode>(&self, storage_key: StorageKey) -> MonitorResult<Option<R>> {
+  async fn fetch_storage(&self, storage_key: &StorageKey) -> MonitorResult<RpcResponse> {
     let param = array_bytes::bytes2hex("0x", storage_key.deref());
     let reqbody = format!(
       r#"{{"id":1,"jsonrpc":"2.0","method":"state_getStorage","params":["{}"]}}"#,
@@ -67,7 +66,6 @@ impl Subclient {
       .send()
       .await?;
     let respbody = response.text().await?;
-    let rpc_resp: RpcResponse = serde_json::from_str(&respbody)?;
     tracing::trace!(
       target: "alarmmgr",
       "{} <-- [{}] {}",
@@ -75,6 +73,18 @@ impl Subclient {
       self.endpoint,
       respbody,
     );
+    Ok(serde_json::from_str(&respbody)?)
+  }
+
+  /// query storage raw
+  pub async fn storage_raw(&self, storage_key: &StorageKey) -> MonitorResult<Option<String>> {
+    let rpc_resp = self.fetch_storage(storage_key).await?;
+    Ok(rpc_resp.result)
+  }
+
+  /// query storage
+  pub async fn storage<R: Decode>(&self, storage_key: &StorageKey) -> MonitorResult<Option<R>> {
+    let rpc_resp = self.fetch_storage(storage_key).await?;
     match rpc_resp.result_bytes()? {
       Some(v) => Ok(Some(Decode::decode(&mut v.as_slice())?)),
       None => Ok(None),

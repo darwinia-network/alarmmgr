@@ -1,5 +1,8 @@
 use substorager::StorageKey;
 
+use alarmmgr_notification::types::AlertLevel;
+use alarmmgr_toolkit::logk;
+
 use crate::client::Subclient;
 use crate::error::MonitorResult;
 use crate::traits::MonitorProbe;
@@ -26,25 +29,35 @@ impl MonitorProbe for FeemarketS2SProbe {
 
 impl FeemarketS2SProbe {
   async fn check_feemarket_assigned_relays(&self) -> MonitorResult<AlertInfo> {
+    tracing::trace!(
+      target: "alarmmgr",
+      "{} ==> check feemarket s2s",
+      logk::prefix_multi("monitor", vec!["feemarket-s2s", &self.config.bridge]),
+    );
+
     let client = Subclient::new(&self.config.endpoint)?;
-    let storage_key = StorageKey::builder(&self.config.pallet_name, "AssignedRelayers").build();
-    let relayers: Vec<FeeMarketRelayer> = client.storage(storage_key).await?.unwrap_or_default();
+    let storage_name = "AssignedRelayers";
+    let storage_key = StorageKey::builder(&self.config.pallet_name, storage_name).build();
+    let relayers: Vec<FeeMarketRelayer> = client.storage(&storage_key).await?.unwrap_or_default();
+
+    let mark = ProbeMark::FeemarketS2s {
+      chain: self.config.bridge.clone(),
+    };
+
+    // check if relayers is empty
     if relayers.is_empty() {
       return Ok(
-        AlertMessage::simple(format!(
-          "Not have assigned relayers for {} [{}]",
-          self.config.chain, self.config.endpoint
-        ))
-        .p1(ProbeMark::feemarket_s2s_assigned_relayers(
-          &self.config.chain,
-        )),
+        AlertMessage::simple(
+          AlertLevel::P1,
+          format!(
+            "[{}] [{}::{}] [{}] not have assigned relayers",
+            self.config.bridge, self.config.pallet_name, storage_name, self.config.endpoint
+          ),
+        )
+        .to_alert_info(mark),
       );
     }
-    Ok(
-      AlertMessage::success().normal(ProbeMark::feemarket_s2s_assigned_relayers(
-        &self.config.chain,
-      )),
-    )
+    Ok(AlertMessage::success().to_alert_info(mark))
   }
 }
 
@@ -56,7 +69,7 @@ mod types {
   #[derive(Clone, Debug, Deserialize, Serialize)]
   pub struct FeemarketS2SProbeConfig {
     pub endpoint: String,
-    pub chain: String,
+    pub bridge: String,
     pub pallet_name: String,
   }
 

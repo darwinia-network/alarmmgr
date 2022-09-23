@@ -25,7 +25,7 @@ impl AlertLevel {
     match self {
       Self::P1 => "P1",
       Self::P2 => "P2",
-      Self::P3 => "p3",
+      Self::P3 => "P3",
     }
   }
 }

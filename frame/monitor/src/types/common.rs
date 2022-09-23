@@ -90,6 +90,7 @@ pub struct AlertMessage {
   pub title: String,
   pub body: Option<String>,
   pub origin: MessageOrigin,
+  pub level: Option<AlertLevel>,
 }
 
 impl Default for AlertMessage {
@@ -99,19 +100,21 @@ impl Default for AlertMessage {
 }
 
 impl AlertMessage {
-  pub fn simple(title: impl AsRef<str>) -> Self {
+  pub fn simple(level: AlertLevel, title: impl AsRef<str>) -> Self {
     Self {
       title: title.as_ref().to_string(),
       body: None,
       origin: MessageOrigin::Alarmmgr,
+      level: Some(level),
     }
   }
 
-  pub fn with_body(title: impl AsRef<str>, body: impl AsRef<str>) -> Self {
+  pub fn with_body(level: AlertLevel, title: impl AsRef<str>, body: impl AsRef<str>) -> Self {
     Self {
       title: title.as_ref().to_string(),
       body: Some(body.as_ref().to_string()),
       origin: MessageOrigin::Alarmmgr,
+      level: Some(level),
     }
   }
 
@@ -120,6 +123,7 @@ impl AlertMessage {
       title: "success".to_string(),
       body: None,
       origin: MessageOrigin::Alarmmgr,
+      level: None,
     }
   }
 }
@@ -131,6 +135,15 @@ impl AlertMessage {
       .expect("Unreachable")
       .as_millis()
       .to_string()
+  }
+
+  pub fn to_alert_info(&self, mark: ProbeMark) -> AlertInfo {
+    match self.level {
+      Some(AlertLevel::P1) => self.p1(mark),
+      Some(AlertLevel::P2) => self.p2(mark),
+      Some(AlertLevel::P3) => self.p3(mark),
+      None => self.normal(mark),
+    }
   }
 
   pub fn p1(&self, mark: ProbeMark) -> AlertInfo {
@@ -159,6 +172,9 @@ impl AlertMessage {
       id: self.next_id(),
       mark,
     }
+  }
+  pub fn normal_simple(&self, mark: impl AsRef<str>) -> AlertInfo {
+    self.normal(ProbeMark::generic(mark))
   }
 }
 
