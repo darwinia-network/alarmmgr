@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Alarm for darwinia bridger",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/darwinia-network/alarmmgr.git"
@@ -15,5 +12,16 @@
   "bugs": {
     "url": "https://github.com/darwinia-network/alarmmgr/issues"
   },
-  "homepage": "https://github.com/darwinia-network/alarmmgr#readme"
+  "homepage": "https://github.com/darwinia-network/alarmmgr#readme",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "boot": "lerna bootstrap"
+  },
+  "devDependencies": {
+    "lerna": "^5.5.2",
+    "nx": "^14.4.3"
+  }
 }
