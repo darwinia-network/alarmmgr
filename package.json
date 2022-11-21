@@ -1,0 +1,19 @@
+{
+  "name": "alarmmgr",
+  "version": "1.0.0",
+  "description": "Alarm for darwinia bridger",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darwinia-network/alarmmgr.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/darwinia-network/alarmmgr/issues"
+  },
+  "homepage": "https://github.com/darwinia-network/alarmmgr#readme"
+}
