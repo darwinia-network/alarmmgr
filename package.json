@@ -18,7 +18,9 @@
     "packages/*"
   ],
   "scripts": {
-    "boot": "lerna bootstrap"
+    "boot": "lerna bootstrap",
+    "build:all": "lerna run build",
+    "test:all": "lerna run test"
   },
   "devDependencies": {
     "lerna": "^5.5.2",
