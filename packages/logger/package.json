@@ -1,5 +1,5 @@
 {
-  "name": "alarmmgr-types",
+  "name": "alarmmgr-logger",
   "version": "0.0.1",
   "description": "Alarmmgr",
   "main": "build/index.js",
@@ -11,12 +11,9 @@
   "license": "GPLv3",
   "devDependencies": {
     "@types/node": "^18.11.9",
-    "@types/jest": "^27.5.1",
-    "typescript": "^4.8.4",
-    "ts-jest": "^28.0.2",
-    "jest": "^28.1.0"
+    "typescript": "^4.8.4"
   },
   "dependencies": {
-
+    "winston": "^3.8.2"
   }
 }

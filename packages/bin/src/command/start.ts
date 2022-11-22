@@ -1,4 +1,5 @@
 import yargs from 'yargs';
+import {StartHandler} from "../handler/start";
 
 
 const StartCommand: yargs.CommandModule = {
@@ -9,8 +10,8 @@ const StartCommand: yargs.CommandModule = {
   describe: 'Start alarmmgr monitor',
   handler: async (args: yargs.Arguments) => {
     const {bridge} = args;
-    console.log(`start with bridges -> ${bridge}`);
-    // await probe.start();
+    const handler = new StartHandler(bridge as unknown as Array<string>);
+    await handler.start();
   },
 }
 
