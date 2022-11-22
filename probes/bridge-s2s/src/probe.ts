@@ -3,6 +3,7 @@ import {Bridge} from "./types/expose";
 import {Chain} from "./types/inner";
 import {SoloWithSoloBridgeProde} from "./solo_with_solo";
 import {logger} from "alarmmgr-logger";
+import {CHAIN_INFO} from "alarmmgr-types";
 
 
 export class BridgeS2SProbe implements AlarmProbe {
@@ -31,7 +32,12 @@ export class BridgeS2SProbe implements AlarmProbe {
 
   private extractSoloWithSoloChainPairs(): [Chain, Chain] {
     const [leftChainName, rightChainName] = this.bridge.split('-');
-    logger.debug(`LEFT -> ${leftChainName}, RIGHT -> ${rightChainName}`);
+    const [sourChainInfo, targetChainInfo] = [
+      CHAIN_INFO[leftChainName], CHAIN_INFO[rightChainName]
+    ];
+    // logger.debug(`LEFTX -> ${sourChainInfo}, RIGHT -> ${targetChainInfo}`);
+    console.log(sourChainInfo)
+    console.log(targetChainInfo)
     return [{}, {}]
   }
 

@@ -298,7 +298,7 @@ const lodestarMainnet = {
 };
 
 
-export default {
+export const CHAIN_INFO = {
   darwinia,
   crab,
   pangolin,
