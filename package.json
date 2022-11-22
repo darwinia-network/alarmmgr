@@ -15,7 +15,8 @@
   "homepage": "https://github.com/darwinia-network/alarmmgr#readme",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "probes/*"
   ],
   "scripts": {
     "boot": "lerna bootstrap",

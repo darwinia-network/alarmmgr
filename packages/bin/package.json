@@ -25,6 +25,8 @@
     "yargs": "^17.6.2",
     "alarmmgr-types": "0.0.1",
     "alarmmgr-logger": "0.0.1",
+    "alarmmgr-probe-s2s": "0.0.1",
+    "alarmmgr-probe-e2e": "0.0.1",
     "await-timeout": "^1.1.1"
   }
 }

@@ -1,10 +1,6 @@
 import Timeout from 'await-timeout';
 import {logger} from 'alarmmgr-logger';
 
-// logger.add(new winston.transports.Console({
-//   format: winston.format.simple(),
-// }));
-
 export class StartHandler {
   constructor(
     /**
