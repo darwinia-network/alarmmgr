@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "alarmmgr-logger": "0.0.1",
+    "alarmmgr-types": "0.0.1",
     "alarmmgr-probe-traits": "0.0.1"
   }
 }
