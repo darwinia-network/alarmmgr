@@ -35,7 +35,7 @@ export class BridgeS2SProbe implements AlarmProbe {
     const [sourChainInfo, targetChainInfo] = [
       CHAIN_INFO[leftChainName], CHAIN_INFO[rightChainName]
     ];
-    // logger.debug(`LEFTX -> ${sourChainInfo}, RIGHT -> ${targetChainInfo}`);
+    // logger.debug(`LEFT -> ${sourChainInfo}, RIGHT -> ${targetChainInfo}`);
     console.log(sourChainInfo)
     console.log(targetChainInfo)
     return [{}, {}]
