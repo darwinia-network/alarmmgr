@@ -1,3 +1,3 @@
 
 
-export * from './chain'
+export * from './bridge_chain'

@@ -11,7 +11,9 @@
   "license": "GPLv3",
   "devDependencies": {
     "@types/node": "^18.11.9",
-    "typescript": "^4.8.4"
+    "typescript": "^4.8.4",
+    "@darwinia/api-options": "^2.8.10",
+    "@polkadot/api": "^9.4.2"
   },
   "dependencies": {
     "alarmmgr-logger": "0.0.1",

@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
 import StartCommand from "./command/start";
+import {Initializer} from "./initializer";
 
 
-// main
-(async () => {
+function main() {
   // enable logger
   if (process.env.LOGGER === undefined) {
     process.env.LOGGER = 'INFO';
   }
+
+  Initializer.init();
 
   // parser
   const _ = yargs
@@ -22,4 +24,6 @@ import StartCommand from "./command/start";
   if (process.argv.length < 3) {
     yargs.showHelp();
   }
-})();
+}
+
+main();

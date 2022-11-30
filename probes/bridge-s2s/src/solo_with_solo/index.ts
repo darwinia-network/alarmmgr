@@ -1,21 +1,18 @@
 import {AlarmProbe} from "alarmmgr-probe-traits";
-import {Chain} from "../types/inner";
+import {S2SBridgeProbeDetectGrandpa} from "../common/detect_grandpa";
+import {SoloWithSoloPara} from "../types/inner";
 
 export class SoloWithSoloBridgeProde implements AlarmProbe {
 
-  private source: Chain;
-  private target: Chain;
 
-  constructor(options: {
-    source: Chain,
-    target: Chain,
-  }) {
-    this.source = options.source;
-    this.target = options.target;
+  constructor(
+    private readonly para: SoloWithSoloPara,
+  ) {
   }
 
   async probe(): Promise<void> {
-
+    const detectGrandpa = new S2SBridgeProbeDetectGrandpa(this.para);
+    await detectGrandpa.detect();
   }
 
 }

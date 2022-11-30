@@ -58,7 +58,7 @@ const crab = {
         feemarket: 'crabParachainFeeMarket',
         grandpa: 'bridgeKusamaGrandpa',
         messages: 'bridgeCrabParachainMessages',
-        parachains: 'bridgeKusamaParachain',
+        parachain: 'bridgeKusamaParachain',
       },
       lanes: ['0x70616372'],
       para_id: 2105,
@@ -92,7 +92,7 @@ const pangolin = {
         feemarket: 'pangolinParachainFeeMarket',
         grandpa: 'bridgeRococoGrandpa',
         messages: 'bridgePangolinParachainMessages',
-        parachains: 'bridgeRococoParachains',
+        parachain: 'bridgeRococoParachains',
       },
       lanes: ['0x70616c69'],
       para_id: 2105,
@@ -103,7 +103,7 @@ const pangolin = {
         feemarket: 'pangolinParachainAlphaFeeMarket',
         grandpa: 'bridgeMoonbaseRelayGrandpa',
         messages: 'bridgePangolinParachainAlphaMessages',
-        parachains: 'bridgeMoonbaseRelayParachains',
+        parachain: 'bridgeMoonbaseRelayParachains',
       },
       lanes: ['0x706c7061'],
       para_id: 2105,
@@ -298,7 +298,7 @@ const lodestarMainnet = {
 };
 
 
-export const CHAIN_INFO = {
+export const BRIDGE_CHAIN_INFO = {
   darwinia,
   crab,
   pangolin,
@@ -312,4 +312,31 @@ export const CHAIN_INFO = {
   goerli,
   ethereum,
   lodestarmainnet: lodestarMainnet,
+}
+
+export interface S2SBridgeChain {
+  endpoint: S2SBridgeChainEndpoint;
+  name: string;
+  logo: string;
+  color: string;
+  explorer: string;
+  precision: number;
+}
+
+export interface S2SBridgeChainEndpoint {
+  websocket: string;
+}
+
+export interface S2SBridgeChainTarget {
+  query_name: S2SBridgeChainTargeQueryName,
+  lanes: Array<string>;
+  para_id: number;
+  relay_chain?: string;
+}
+
+export interface S2SBridgeChainTargeQueryName {
+  feemarket: string;
+  grandpa: string;
+  messages: string;
+  parachain: string
 }

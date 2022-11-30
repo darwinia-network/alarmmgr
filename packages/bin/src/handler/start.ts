@@ -1,13 +1,13 @@
 import Timeout from 'await-timeout';
 import {logger} from 'alarmmgr-logger';
-import {Bridge, BridgeS2SProbe} from "alarmmgr-probe-s2s";
+import {ProbeCenter} from "../plugins/probe_center";
 
 export class StartHandler {
   constructor(
     /**
      * probe bridges
      */
-    private readonly bridges: Array<string>,
+    private readonly probes: Array<string>,
   ) {
   }
 
@@ -23,14 +23,9 @@ export class StartHandler {
   }
 
   private async run(): Promise<void> {
-    logger.debug(`start with bridges -> ${this.bridges}`);
-    for (const bridge of this.bridges) {
-      let probe;
-      const bridgeS2S = Bridge.of(bridge);
-      if (bridgeS2S) {
-        probe = new BridgeS2SProbe({bridge: bridgeS2S});
-      }
-
+    logger.debug(`start with bridges -> ${this.probes}`);
+    for (const probeName of this.probes) {
+      const probe = ProbeCenter.probe(probeName);
       if (probe) {
         await probe.probe();
       }

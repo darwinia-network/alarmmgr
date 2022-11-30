@@ -4,13 +4,13 @@ import {StartHandler} from "../handler/start";
 
 const StartCommand: yargs.CommandModule = {
   builder: (argv: yargs.Argv) => {
-    return argv.array('bridge');
+    return argv.array('probe');
   },
   command: 'start',
   describe: 'Start alarmmgr monitor',
   handler: async (args: yargs.Arguments) => {
-    const {bridge} = args;
-    const handler = new StartHandler(bridge as unknown as Array<string>);
+    const {probe} = args;
+    const handler = new StartHandler(probe as unknown as Array<string>);
     await handler.start();
   },
 }
