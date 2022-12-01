@@ -38,6 +38,8 @@ export class BridgeS2SProbe implements AlarmProbe {
     const [sourceChain, targetChain]: [S2SBridgeChain, S2SBridgeChain] = [
       BRIDGE_CHAIN_INFO[leftChainName], BRIDGE_CHAIN_INFO[rightChainName]
     ];
+    sourceChain.bridge_chain_name = leftChainName;
+    targetChain.bridge_chain_name = rightChainName;
 
     let sourceClient = BridgeS2SProbe.connectionMap.get(leftChainName);
     let targetClient = BridgeS2SProbe.connectionMap.get(rightChainName);
@@ -54,6 +56,12 @@ export class BridgeS2SProbe implements AlarmProbe {
       targetClient = await ApiPromise.create({provider: targetProvider});
       BridgeS2SProbe.connectionMap.set(rightChainName, targetClient);
       logger.debug('connected');
+    }
+    if (!sourceClient.isConnected) {
+      await sourceClient.connect();
+    }
+    if (!targetClient.isConnected) {
+      await targetClient.connect();
     }
 
     return {

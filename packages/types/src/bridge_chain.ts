@@ -317,10 +317,12 @@ export const BRIDGE_CHAIN_INFO = {
 export interface S2SBridgeChain {
   endpoint: S2SBridgeChainEndpoint;
   name: string;
+  bridge_chain_name: string;
   logo: string;
   color: string;
   explorer: string;
   precision: number;
+  subql: string;
 }
 
 export interface S2SBridgeChainEndpoint {
