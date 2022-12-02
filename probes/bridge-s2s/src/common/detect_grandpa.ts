@@ -46,10 +46,16 @@ export class S2SBridgeProbeDetectGrandpa {
     );
     const _bestFinalizedBlock = await sourceClient.rpc.chain.getBlock(bestFinalizedHash.toString());
     const bestFinalizedBlock = _bestFinalizedBlock.toJSON();
+    // @ts-ignore
+    const bestFinalizedBlockNumber = bestFinalizedBlock.block.header.number;
+    console.log('best finalize block number: ', bestFinalizedBlockNumber);
     const nextMandatory = await this.sourceSubql.bridge_s2s()
-      // @ts-ignore
-      .nextMandatoryBlock(bestFinalizedBlock.block.header.number);
+      .nextMandatoryBlock(bestFinalizedBlockNumber);
     console.log(nextMandatory);
+
+    const nextOnDemand = await this.sourceSubql.bridge_s2s()
+      .nextOnDemandBlock(`bridge-${targetChain.bridge_chain_name}`);
+    console.log(nextOnDemand);
 
   }
 }

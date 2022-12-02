@@ -32,7 +32,6 @@ export class BridgeS2SProbe implements AlarmProbe {
     }
   }
 
-
   private async extractSoloWithSoloChainPairs(): Promise<SoloWithSoloPara> {
     const [leftChainName, rightChainName] = this.bridge.split('-');
     const [sourceChain, targetChain]: [S2SBridgeChain, S2SBridgeChain] = [
@@ -41,28 +40,17 @@ export class BridgeS2SProbe implements AlarmProbe {
     sourceChain.bridge_chain_name = leftChainName;
     targetChain.bridge_chain_name = rightChainName;
 
-    let sourceClient = BridgeS2SProbe.connectionMap.get(leftChainName);
-    let targetClient = BridgeS2SProbe.connectionMap.get(rightChainName);
-    if (!sourceClient) {
-      logger.info(`connect to ${sourceChain.endpoint.websocket}`);
-      const sourceProvider = new WsProvider(sourceChain.endpoint.websocket);
-      sourceClient = await ApiPromise.create({provider: sourceProvider});
-      BridgeS2SProbe.connectionMap.set(leftChainName, sourceClient);
-      logger.debug('connected');
-    }
-    if (!targetClient) {
-      logger.info(`connect to ${targetChain.endpoint.websocket}`);
-      const targetProvider = new WsProvider(targetChain.endpoint.websocket);
-      targetClient = await ApiPromise.create({provider: targetProvider});
-      BridgeS2SProbe.connectionMap.set(rightChainName, targetClient);
-      logger.debug('connected');
-    }
-    if (!sourceClient.isConnected) {
-      await sourceClient.connect();
-    }
-    if (!targetClient.isConnected) {
-      await targetClient.connect();
-    }
+    logger.info(`connect to ${sourceChain.endpoint.websocket}`);
+    const sourceProvider = new WsProvider(sourceChain.endpoint.websocket);
+    const sourceClient = await ApiPromise.create({provider: sourceProvider});
+    BridgeS2SProbe.connectionMap.set(leftChainName, sourceClient);
+    logger.debug('connected');
+
+    logger.info(`connect to ${targetChain.endpoint.websocket}`);
+    const targetProvider = new WsProvider(targetChain.endpoint.websocket);
+    const targetClient = await ApiPromise.create({provider: targetProvider});
+    BridgeS2SProbe.connectionMap.set(rightChainName, targetClient);
+    logger.debug('connected');
 
     return {
       sourceChain,
@@ -71,6 +59,49 @@ export class BridgeS2SProbe implements AlarmProbe {
       targetClient,
     }
   }
+
+  // private async extractSoloWithSoloChainPairs(): Promise<SoloWithSoloPara> {
+  //   const [leftChainName, rightChainName] = this.bridge.split('-');
+  //   const [sourceChain, targetChain]: [S2SBridgeChain, S2SBridgeChain] = [
+  //     BRIDGE_CHAIN_INFO[leftChainName], BRIDGE_CHAIN_INFO[rightChainName]
+  //   ];
+  //   sourceChain.bridge_chain_name = leftChainName;
+  //   targetChain.bridge_chain_name = rightChainName;
+  //
+  //   let sourceClient = BridgeS2SProbe.connectionMap.get(leftChainName);
+  //   let targetClient = BridgeS2SProbe.connectionMap.get(rightChainName);
+  //   if (!sourceClient) {
+  //     logger.info(`connect to ${sourceChain.endpoint.websocket}`);
+  //     const sourceProvider = new WsProvider(sourceChain.endpoint.websocket);
+  //     sourceClient = await ApiPromise.create({provider: sourceProvider});
+  //     BridgeS2SProbe.connectionMap.set(leftChainName, sourceClient);
+  //     logger.debug('connected');
+  //   }
+  //   if (!targetClient) {
+  //     logger.info(`connect to ${targetChain.endpoint.websocket}`);
+  //     const targetProvider = new WsProvider(targetChain.endpoint.websocket);
+  //     targetClient = await ApiPromise.create({provider: targetProvider});
+  //     BridgeS2SProbe.connectionMap.set(rightChainName, targetClient);
+  //     logger.debug('connected');
+  //   }
+  //   if (!sourceClient.isConnected) {
+  //     await sourceClient.disconnect();
+  //     await Timeout.set(1000 * 10);
+  //     await sourceClient.connect();
+  //   }
+  //   if (!targetClient.isConnected) {
+  //     await sourceClient.disconnect();
+  //     await Timeout.set(1000 * 10);
+  //     await targetClient.connect();
+  //   }
+  //
+  //   return {
+  //     sourceChain,
+  //     targetChain,
+  //     sourceClient,
+  //     targetClient,
+  //   }
+  // }
 
 
 }
