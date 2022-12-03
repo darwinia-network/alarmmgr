@@ -23,12 +23,15 @@ export class StartHandler {
   }
 
   private async run(): Promise<void> {
-    logger.debug(`start with bridges -> ${this.probes}`);
     for (const probeName of this.probes) {
+      logger.debug(`start with probe -> ${probeName}`);
       const probe = ProbeCenter.probe(probeName);
-      if (probe) {
-        await probe.probe();
+      if (!probe) {
+        logger.warn(`not found probe by name: ${probeName}, please register it.`);
+        continue;
       }
+      const alerts = await probe.probe();
+      console.log(`[${probeName}] alerts: `, alerts);
       await Timeout.set(1000);
     }
   }

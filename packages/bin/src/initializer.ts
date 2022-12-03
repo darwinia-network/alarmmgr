@@ -11,12 +11,16 @@ export class Initializer {
   }
 
   private static initProbeCenter(): void {
-    const probes = [
-      {name: 'bridge-pangolin-pangoro', probe: new BridgeS2SProbe({bridge: Bridge.PangolinPangoro})},
-      {name: 'bridge-darwinia-crab', probe: new BridgeS2SProbe({bridge: Bridge.DarwiniaCrab})},
+    // init s2s bridge probes
+    const bridgeS2SProbes = [
+      {name: 'bridge-pangolin-pangoro', bridge: Bridge.PangolinPangoro},
+      {name: 'bridge-darwinia-crab', bridge: Bridge.DarwiniaCrab},
+      {name: 'bridge-pangolin-pangolinparachain', bridge: Bridge.PangolinPangolinParachain},
     ];
-    for (const probe of probes) {
-      ProbeCenter.register(probe.name, probe.probe);
+    for (const probe of bridgeS2SProbes) {
+      ProbeCenter.register(probe.name, new BridgeS2SProbe({bridge: probe.bridge}));
     }
+
+    // init substrate chain probes
   }
 }

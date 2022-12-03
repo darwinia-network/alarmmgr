@@ -1,6 +1,7 @@
 const darwinia = {
   endpoint: {
     websocket: 'wss://rpc.darwinia.network',
+    http: 'https://rpc.darwinia.network',
     evm: 'https://rpc.darwinia.network',
   },
   name: 'Darwinia',
@@ -37,6 +38,7 @@ const darwinia = {
 const crab = {
   endpoint: {
     websocket: 'wss://crab-rpc.darwinia.network',
+    http: 'https://crab-rpc.darwinia.network',
   },
   name: 'Crab',
   logo: 'https://polkadot.js.org/apps/static/crab.ebc98461..svg',
@@ -71,6 +73,7 @@ const crab = {
 const pangolin = {
   endpoint: {
     websocket: 'wss://pangolin-rpc.darwinia.network',
+    http: 'https://pangolin-rpc.darwinia.network',
   },
   name: 'Pangolin',
   logo: 'https://polkadot.js.org/apps/static/pangolin.db0518f6..svg',
@@ -116,6 +119,7 @@ const pangolin = {
 const pangoro = {
   endpoint: {
     websocket: 'wss://pangoro-rpc.darwinia.network',
+    http: 'https://pangoro-rpc.darwinia.network',
   },
   name: 'Pangoro',
   logo: 'https://polkadot.js.org/apps/static/pangoro.db0ff9cb..svg',
@@ -139,6 +143,7 @@ const pangoro = {
 const pangolin_parachain = {
   endpoint: {
     websocket: 'wss://pangolin-parachain-rpc.darwinia.network',
+    http: 'https://pangolin-parachain-rpc.darwinia.network',
   },
   name: 'Pangolin Parachain',
   logo: 'https://polkadot.js.org/apps/static/pangolin.db0518f6..svg',
@@ -164,6 +169,7 @@ const pangolin_parachain = {
 const pangolin_parachain_alpha = {
   endpoint: {
     websocket: 'wss://pangolin-parachain-alpha-rpc.darwinia.network',
+    http: 'https://pangolin-parachain-alpha-rpc.darwinia.network',
   },
   name: 'Pangolin Parachain Alpha',
   logo: 'https://polkadot.js.org/apps/static/pangolin.db0518f6..svg',
@@ -189,6 +195,7 @@ const pangolin_parachain_alpha = {
 const crab_parachain = {
   endpoint: {
     websocket: 'wss://crab-parachain-rpc.darwinia.network',
+    http: 'https://crab-parachain-rpc.darwinia.network',
   },
   name: 'Crab Parachain',
   logo: 'https://polkadot.js.org/apps/static/crab.ebc98461..svg',
@@ -214,6 +221,7 @@ const crab_parachain = {
 const kusama = {
   endpoint: {
     websocket: 'wss://kusama-rpc.polkadot.io',
+    http: 'https://kusama-rpc.polkadot.io',
   },
   name: 'Kusama',
   logo: 'https://polkadot.js.org/apps/static/kusama-128.e5f13822..gif',
@@ -227,6 +235,7 @@ const kusama = {
 const rococo = {
   endpoint: {
     websocket: 'wss://rococo-rpc.polkadot.io',
+    http: 'https://rococo-rpc.polkadot.io',
   },
   name: 'Rococo',
   logo: 'https://polkadot.js.org/apps/static/rococo.560c473b..svg',
@@ -240,6 +249,7 @@ const rococo = {
 const moonbase = {
   endpoint: {
     websocket: 'wss://frag-moonbase-relay-rpc-ws.g.moonbase.moonbeam.network',
+    http: 'https://frag-moonbase-relay-rpc-ws.g.moonbase.moonbeam.network',
   },
   name: 'Moonbase',
   logo: 'https://polkadot.js.org/apps/static/polkadot-circle.1eea41b2..svg',
@@ -327,6 +337,7 @@ export interface S2SBridgeChain {
 
 export interface S2SBridgeChainEndpoint {
   websocket: string;
+  http: string;
 }
 
 export interface S2SBridgeChainTarget {

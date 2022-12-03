@@ -1,42 +1,51 @@
-import {SoloWithSoloPara} from "../types/inner";
+import {SoloWithSoloArg} from "../types/inner";
 import {logger} from "alarmmgr-logger";
-import {Subquery} from "alarmmgr-subquery/src";
+import {BridgeS2SNextRelayBlock, Subquery} from "alarmmgr-subquery";
+import {Alert, Alerts, Level} from "alarmmgr-types";
 
 export class S2SBridgeProbeDetectGrandpa {
 
-  private readonly para: SoloWithSoloPara;
+  private readonly arg: SoloWithSoloArg;
   private readonly sourceSubql: Subquery;
   private readonly targetSubql: Subquery;
+  private readonly maxAllowMissingBlock: number;
 
-  // private readonly parachainBridge: boolean;
-  // private readonly grandpaPalletName?: string;
+  private readonly parachainBridge: boolean;
+  private readonly grandpaPalletName?: string;
 
   constructor(options: {
-    para: SoloWithSoloPara,
+    arg: SoloWithSoloArg,
     sourceSubql: Subquery,
     targetSubql: Subquery,
-    // parachainBridge: boolean,
-    // grandpaPalletName?: string,
+    parachainBridge?: boolean,
+    grandpaPalletName?: string,
   }) {
-    this.para = options.para;
+    this.arg = options.arg;
     this.sourceSubql = options.sourceSubql;
     this.targetSubql = options.targetSubql;
-    // this.parachainBridge = options.parachainBridge;
-    // this.grandpaPalletName = options.grandpaPalletName;
+    this.maxAllowMissingBlock = 100;
+    this.parachainBridge = options.parachainBridge ?? false;
+    this.grandpaPalletName = options.grandpaPalletName;
   }
 
-  public async detect(): Promise<void> {
-    // const {sourceClient} = this.para;
-    // const block = await sourceClient.rpc.chain.getBlock();
-    // console.log(block.toJSON());
-    await this.detectSourceChain();
+  public async detect(): Promise<Array<Alert>> {
+    const alertsSourceToTarget = await this.detectSourceChain();
+    return alertsSourceToTarget.alerts();
   }
 
-
-  private async detectSourceChain(): Promise<void> {
-    const {sourceChain, targetChain, sourceClient, targetClient} = this.para;
+  private _grandpaPalletName() {
+    if (this.parachainBridge) {
+      return this.grandpaPalletName;
+    }
+    const {sourceChain, targetChain} = this.arg;
     // @ts-ignore
-    const palletName = targetChain.bridge_target[sourceChain.bridge_chain_name].query_name.grandpa;
+    return targetChain.bridge_target[sourceChain.bridge_chain_name].query_name.grandpa;
+  }
+
+  private async detectSourceChain(): Promise<Alerts> {
+    const {sourceChain, targetChain, sourceClient, targetClient} = this.arg;
+    // @ts-ignore
+    const palletName = this._grandpaPalletName();
     const _bestFinalizedHash = await targetClient.query[palletName].bestFinalized();
     const bestFinalizedHash = _bestFinalizedHash.toHuman();
     logger.debug(
@@ -48,14 +57,59 @@ export class S2SBridgeProbeDetectGrandpa {
     const bestFinalizedBlock = _bestFinalizedBlock.toJSON();
     // @ts-ignore
     const bestFinalizedBlockNumber = bestFinalizedBlock.block.header.number;
-    console.log('best finalize block number: ', bestFinalizedBlockNumber);
-    const nextMandatory = await this.sourceSubql.bridge_s2s()
+    const nextMandatory: BridgeS2SNextRelayBlock = await this.sourceSubql.bridge_s2s()
       .nextMandatoryBlock(bestFinalizedBlockNumber);
-    console.log(nextMandatory);
 
-    const nextOnDemand = await this.sourceSubql.bridge_s2s()
+    const mark = `bridge-s2s-${sourceChain.bridge_chain_name}-with-${targetChain.bridge_chain_name}`;
+    const alerts = Alerts.create();
+    if (nextMandatory) {
+      const missing = nextMandatory.blockNumber - bestFinalizedBlockNumber;
+      if (missing > this.maxAllowMissingBlock) {
+        alerts.push({
+          level: Level.P1,
+          mark,
+          title: `${sourceChain.bridge_chain_name} -> ${targetChain.bridge_chain_name} mandatory header stopped`,
+          body: `last relayed: ${bestFinalizedBlockNumber}, mandatory: ${nextMandatory.blockNumber}`,
+        });
+      } else {
+        if (missing > this.maxAllowMissingBlock / 2) {
+          alerts.push({
+            level: Level.P2,
+            mark,
+            title: `${sourceChain.bridge_chain_name} -> ${targetChain.bridge_chain_name} mandatory header missing block > ${this.maxAllowMissingBlock / 2}`,
+            body: `relayed: ${bestFinalizedBlockNumber}, mandatory: ${nextMandatory.blockNumber}`,
+          });
+        }
+      }
+    }
+
+    if (this.parachainBridge) {
+      return alerts;
+    }
+
+    const nextOnDemand: BridgeS2SNextRelayBlock = await this.sourceSubql.bridge_s2s()
       .nextOnDemandBlock(`bridge-${targetChain.bridge_chain_name}`);
-    console.log(nextOnDemand);
+    if (nextOnDemand) {
+      const missing = nextOnDemand.blockNumber - nextOnDemand.blockNumber;
+      if (missing > this.maxAllowMissingBlock) {
+        alerts.push({
+          level: Level.P1,
+          mark,
+          title: `${sourceChain.bridge_chain_name} -> ${targetChain.bridge_chain_name} on-demand header stopped`,
+          body: `relayed: ${bestFinalizedBlockNumber}, on-demand: ${nextOnDemand.blockNumber}`,
+        });
+      } else {
+        if (missing > this.maxAllowMissingBlock / 2) {
+          alerts.push({
+            level: Level.P2,
+            mark,
+            title: `${sourceChain.bridge_chain_name} -> ${targetChain.bridge_chain_name} on-demand header missing block > ${this.maxAllowMissingBlock / 2}`,
+            body: `relayed: ${bestFinalizedBlockNumber}, on-demand: ${nextOnDemand.blockNumber}`,
+          });
+        }
+      }
+    }
 
+    return alerts;
   }
 }
