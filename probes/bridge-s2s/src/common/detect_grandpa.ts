@@ -47,7 +47,7 @@ export class S2SBridgeProbeDetectGrandpa {
     const palletName = this._grandpaPalletName();
     const _bestFinalizedHash = await targetClient.query[palletName].bestFinalized();
     const bestFinalizedHash = _bestFinalizedHash.toHuman();
-    logger.debug(
+    logger.info(
       `[bridge-${sourceChain.bridge_chain_name}-${targetChain.bridge_chain_name}] \
     ${sourceChain.bridge_chain_name} in ${targetChain.bridge_chain_name} best finalized is: \
     ${bestFinalizedHash}`

@@ -1,8 +1,9 @@
 import Timeout from 'await-timeout';
 import {logger} from 'alarmmgr-logger';
-import {Lifecycle} from 'alarmmgr-types';
+import {Alert, Level, Lifecycle} from 'alarmmgr-types';
 import {ProbeCenter} from "../plugins/probe_center";
 import {Initializer} from "../initializer";
+import {AlarmProbe} from "alarmmgr-probe-traits";
 
 export class StartHandler {
   constructor(
@@ -28,16 +29,43 @@ export class StartHandler {
   }
 
   private async run(lifecycle: Lifecycle): Promise<void> {
+    const alerts = [];
     for (const probeName of this.probes) {
       logger.debug(`start with probe -> ${probeName}`);
       const probe = ProbeCenter.probe(probeName);
       if (!probe) {
-        logger.warn(`not found probe by name: ${probeName}, please register it.`);
+        logger.warn(`not found probe: [${probeName}], please register it.`);
         continue;
       }
-      const alerts = await probe.probe(lifecycle);
-      console.log(`[${probeName}] alerts: `, alerts);
+      const _alerts = await this.callProbe({
+        name: probeName,
+        probe,
+        lifecycle,
+      });
       await Timeout.set(1000);
+      alerts.push(..._alerts);
     }
+  }
+
+  private async callProbe(options: {
+    name: string,
+    probe: AlarmProbe,
+    lifecycle: Lifecycle,
+  }): Promise<Array<Alert>> {
+    const {name, probe, lifecycle} = options;
+    const alerts = [];
+    try {
+      const _alerts = await probe.probe(lifecycle);
+      alerts.push(..._alerts);
+    } catch (e) {
+      alerts.push({
+        level: Level.P2,
+        mark: `probe-call-failed-${name}`,
+        title: `call probe ${name} failed`,
+        body: `exception trace: ${e}`,
+      });
+    }
+    logger.info(`[${name}] alerts: {}`, alerts);
+    return alerts;
   }
 }

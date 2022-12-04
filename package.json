@@ -16,7 +16,8 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "probes/*"
+    "probes/*",
+    "plugins/*"
   ],
   "scripts": {
     "boot": "lerna bootstrap",

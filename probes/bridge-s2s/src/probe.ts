@@ -1,19 +1,15 @@
 import {AlarmProbe} from "alarmmgr-probe-traits";
 import {Bridge} from "./types/expose";
 import {SoloWithSoloBridgeProde} from "./solo_with_solo";
-import {logger} from "alarmmgr-logger";
 import {Alert, BRIDGE_CHAIN_INFO, Lifecycle, S2SBridgeChain} from "alarmmgr-types";
-import {ApiPromise, HttpProvider, WsProvider} from "@polkadot/api";
 import {SoloWithParaArg, SoloWithSoloArg} from "./types/inner";
-import Timeout from 'await-timeout';
 import {SoloWithParaBridgeProde} from "./solo_with_para";
+import {SubstrateClientInstance} from "alarmmgr-plugin-conn-substrate/src";
 
 
 export class BridgeS2SProbe implements AlarmProbe {
 
   private readonly bridge: Bridge;
-
-  private static connectionMap: Map<string, ApiPromise> = new Map<string, ApiPromise>();
 
   constructor(options: {
     bridge: Bridge,
@@ -50,18 +46,9 @@ export class BridgeS2SProbe implements AlarmProbe {
     const relayChain: S2SBridgeChain = BRIDGE_CHAIN_INFO[relayChainName];
     relayChain.bridge_chain_name = relayChainName;
 
-    const soloClient = await this.substrateClient({
-      chainName: leftChainName,
-      httpEndpoint: soloChain.endpoint.http,
-    });
-    const paraClient = await this.substrateClient({
-      chainName: rightChainName,
-      httpEndpoint: paraChain.endpoint.http,
-    });
-    const relayClient = await this.substrateClient({
-      chainName: relayChainName,
-      httpEndpoint: relayChain.endpoint.http,
-    });
+    const soloClient = await SubstrateClientInstance.instance(soloChain.endpoint.http);
+    const paraClient = await SubstrateClientInstance.instance(paraChain.endpoint.http);
+    const relayClient = await SubstrateClientInstance.instance(relayChain.endpoint.http);
     return {
       soloChain,
       soloClient,
@@ -80,14 +67,8 @@ export class BridgeS2SProbe implements AlarmProbe {
     sourceChain.bridge_chain_name = leftChainName;
     targetChain.bridge_chain_name = rightChainName;
 
-    const sourceClient = await this.substrateClient({
-      chainName: leftChainName,
-      httpEndpoint: sourceChain.endpoint.http,
-    });
-    const targetClient = await this.substrateClient({
-      chainName: rightChainName,
-      httpEndpoint: targetChain.endpoint.http,
-    });
+    const sourceClient = await SubstrateClientInstance.instance(sourceChain.endpoint.http);
+    const targetClient = await SubstrateClientInstance.instance(targetChain.endpoint.http);
 
     return {
       sourceChain,
@@ -96,18 +77,4 @@ export class BridgeS2SProbe implements AlarmProbe {
       targetClient,
     }
   }
-
-  private async substrateClient(options: {chainName: string, httpEndpoint: string}): Promise<ApiPromise> {
-    const probe = BridgeS2SProbe.connectionMap.get(options.chainName);
-    if (probe) {
-      return probe;
-    }
-    logger.info(`connect to ${options.httpEndpoint}`);
-    const provider = new HttpProvider(options.httpEndpoint);
-    const client = await ApiPromise.create({provider: provider});
-    BridgeS2SProbe.connectionMap.set(options.chainName, client);
-    logger.debug('connected');
-    return client;
-  }
-
 }
