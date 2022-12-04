@@ -17,6 +17,6 @@
     "jest": "^28.1.0"
   },
   "dependencies": {
-
+    "@kvs/env": "^2.1.3"
   }
 }

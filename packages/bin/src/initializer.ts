@@ -1,5 +1,8 @@
 import {ProbeCenter} from "./plugins/probe_center";
 import {Bridge, BridgeS2SProbe} from "alarmmgr-probe-s2s";
+import {kvsEnvStorage} from "@kvs/env";
+import {KvsLocalStorage} from "@kvs/node-localstorage";
+import {KvStorageSchema} from "alarmmgr-types";
 
 
 export class Initializer {
@@ -22,5 +25,12 @@ export class Initializer {
     }
 
     // init substrate chain probes
+  }
+
+  public static async initKvdb(): Promise<KvsLocalStorage<KvStorageSchema>> {
+    return await kvsEnvStorage<KvStorageSchema>({
+      name: 'alarmmgr',
+      version: 1
+    });
   }
 }

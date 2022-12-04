@@ -1,6 +1,8 @@
 import Timeout from 'await-timeout';
 import {logger} from 'alarmmgr-logger';
+import {Lifecycle} from 'alarmmgr-types';
 import {ProbeCenter} from "../plugins/probe_center";
+import {Initializer} from "../initializer";
 
 export class StartHandler {
   constructor(
@@ -12,9 +14,12 @@ export class StartHandler {
   }
 
   public async start(): Promise<void> {
+    const lifecycle: Lifecycle = {
+      kv: await Initializer.initKvdb(),
+    };
     while (true) {
       try {
-        await this.run();
+        await this.run(lifecycle);
         await Timeout.set(1000);
       } catch (e) {
         console.error(e);
@@ -22,7 +27,7 @@ export class StartHandler {
     }
   }
 
-  private async run(): Promise<void> {
+  private async run(lifecycle: Lifecycle): Promise<void> {
     for (const probeName of this.probes) {
       logger.debug(`start with probe -> ${probeName}`);
       const probe = ProbeCenter.probe(probeName);
@@ -30,7 +35,7 @@ export class StartHandler {
         logger.warn(`not found probe by name: ${probeName}, please register it.`);
         continue;
       }
-      const alerts = await probe.probe();
+      const alerts = await probe.probe(lifecycle);
       console.log(`[${probeName}] alerts: `, alerts);
       await Timeout.set(1000);
     }

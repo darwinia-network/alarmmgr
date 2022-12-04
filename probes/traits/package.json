@@ -14,5 +14,6 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
+    "alarmmgr-types": "0.0.1"
   }
 }

@@ -2,7 +2,7 @@ import {AlarmProbe} from "alarmmgr-probe-traits";
 import {Bridge} from "./types/expose";
 import {SoloWithSoloBridgeProde} from "./solo_with_solo";
 import {logger} from "alarmmgr-logger";
-import {Alert, BRIDGE_CHAIN_INFO, S2SBridgeChain} from "alarmmgr-types";
+import {Alert, BRIDGE_CHAIN_INFO, Lifecycle, S2SBridgeChain} from "alarmmgr-types";
 import {ApiPromise, HttpProvider, WsProvider} from "@polkadot/api";
 import {SoloWithParaArg, SoloWithSoloArg} from "./types/inner";
 import Timeout from 'await-timeout';
@@ -21,17 +21,17 @@ export class BridgeS2SProbe implements AlarmProbe {
     this.bridge = options.bridge;
   }
 
-  async probe(): Promise<Array<Alert>> {
+  async probe(lifecycle: Lifecycle): Promise<Array<Alert>> {
     switch (this.bridge) {
       case Bridge.PangolinPangoro:
       case Bridge.DarwiniaCrab:
-        const para = await this.extractSoloWithSoloChainPairs();
-        return new SoloWithSoloBridgeProde(para).probe();
+        const arg_0 = await this.extractSoloWithSoloChainPairs();
+        return await new SoloWithSoloBridgeProde({lifecycle, arg: arg_0}).probe();
       case Bridge.CrabCrabParachain:
       case Bridge.PangolinPangolinParachain:
       case Bridge.PangolinPangolinParachainAlpha:
-        const arg = await this.extractSoloWithParaChainPairs();
-        return new SoloWithParaBridgeProde(arg).probe();
+        const arg_1 = await this.extractSoloWithParaChainPairs();
+        return await new SoloWithParaBridgeProde({lifecycle, arg: arg_1}).probe();
       default:
         return [];
     }
@@ -98,6 +98,10 @@ export class BridgeS2SProbe implements AlarmProbe {
   }
 
   private async substrateClient(options: {chainName: string, httpEndpoint: string}): Promise<ApiPromise> {
+    const probe = BridgeS2SProbe.connectionMap.get(options.chainName);
+    if (probe) {
+      return probe;
+    }
     logger.info(`connect to ${options.httpEndpoint}`);
     const provider = new HttpProvider(options.httpEndpoint);
     const client = await ApiPromise.create({provider: provider});
@@ -105,49 +109,5 @@ export class BridgeS2SProbe implements AlarmProbe {
     logger.debug('connected');
     return client;
   }
-
-  // private async extractSoloWithSoloChainPairs(): Promise<SoloWithSoloArg> {
-  //   const [leftChainName, rightChainName] = this.bridge.split('-');
-  //   const [sourceChain, targetChain]: [S2SBridgeChain, S2SBridgeChain] = [
-  //     BRIDGE_CHAIN_INFO[leftChainName], BRIDGE_CHAIN_INFO[rightChainName]
-  //   ];
-  //   sourceChain.bridge_chain_name = leftChainName;
-  //   targetChain.bridge_chain_name = rightChainName;
-  //
-  //   let sourceClient = BridgeS2SProbe.connectionMap.get(leftChainName);
-  //   let targetClient = BridgeS2SProbe.connectionMap.get(rightChainName);
-  //   if (!sourceClient) {
-  //     logger.info(`connect to ${sourceChain.endpoint.http}`);
-  //     const sourceProvider = new HttpProvider(sourceChain.endpoint.http);
-  //     sourceClient = await ApiPromise.create({provider: sourceProvider});
-  //     BridgeS2SProbe.connectionMap.set(leftChainName, sourceClient);
-  //     logger.debug('connected');
-  //   }
-  //   if (!targetClient) {
-  //     logger.info(`connect to ${targetChain.endpoint.http}`);
-  //     const targetProvider = new HttpProvider(targetChain.endpoint.http);
-  //     targetClient = await ApiPromise.create({provider: targetProvider});
-  //     BridgeS2SProbe.connectionMap.set(rightChainName, targetClient);
-  //     logger.debug('connected');
-  //   }
-  //   // if (!sourceClient.isConnected) {
-  //   //   await sourceClient.disconnect();
-  //   //   await Timeout.set(1000 * 10);
-  //   //   await sourceClient.connect();
-  //   // }
-  //   // if (!targetClient.isConnected) {
-  //   //   await sourceClient.disconnect();
-  //   //   await Timeout.set(1000 * 10);
-  //   //   await targetClient.connect();
-  //   // }
-  //
-  //   return {
-  //     sourceChain,
-  //     targetChain,
-  //     sourceClient,
-  //     targetClient,
-  //   }
-  // }
-
 
 }

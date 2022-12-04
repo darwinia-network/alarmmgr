@@ -29,7 +29,7 @@ export class S2SBridgeProbeDetectGrandpa {
   }
 
   public async detect(): Promise<Array<Alert>> {
-    const alertsSourceToTarget = await this.detectSourceChain();
+    const alertsSourceToTarget = await this.detectGrandpa();
     return alertsSourceToTarget.alerts();
   }
 
@@ -42,9 +42,8 @@ export class S2SBridgeProbeDetectGrandpa {
     return targetChain.bridge_target[sourceChain.bridge_chain_name].query_name.grandpa;
   }
 
-  private async detectSourceChain(): Promise<Alerts> {
+  private async detectGrandpa(): Promise<Alerts> {
     const {sourceChain, targetChain, sourceClient, targetClient} = this.arg;
-    // @ts-ignore
     const palletName = this._grandpaPalletName();
     const _bestFinalizedHash = await targetClient.query[palletName].bestFinalized();
     const bestFinalizedHash = _bestFinalizedHash.toHuman();
@@ -60,7 +59,7 @@ export class S2SBridgeProbeDetectGrandpa {
     const nextMandatory: BridgeS2SNextRelayBlock = await this.sourceSubql.bridge_s2s()
       .nextMandatoryBlock(bestFinalizedBlockNumber);
 
-    const mark = `bridge-s2s-${sourceChain.bridge_chain_name}-with-${targetChain.bridge_chain_name}`;
+    const mark = `bridge-s2s-grandpa-${sourceChain.bridge_chain_name}-to-${targetChain.bridge_chain_name}`;
     const alerts = Alerts.create();
     if (nextMandatory) {
       const missing = nextMandatory.blockNumber - bestFinalizedBlockNumber;

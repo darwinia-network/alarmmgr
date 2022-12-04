@@ -1,8 +1,8 @@
-import {Alert} from "alarmmgr-types";
+import {Alert, Lifecycle} from "alarmmgr-types";
 
 /**
  * alarm probe
  */
 export interface AlarmProbe {
-  probe(): Promise<Array<Alert>>;
+  probe(lifecycle: Lifecycle): Promise<Array<Alert>>;
 }
