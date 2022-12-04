@@ -29,7 +29,10 @@
     "alarmmgr-probe-s2s": "0.0.1",
     "alarmmgr-probe-e2e": "0.0.1",
     "alarmmgr-probe-chain-substrate": "0.0.1",
+    "alarmmgr-notification-traits": "0.0.1",
+    "alarmmgr-notification-slack": "0.0.1",
     "await-timeout": "^1.1.1",
-    "@kvs/env": "^2.1.3"
+    "@kvs/env": "^2.1.3",
+    "async": "^3.2.4"
   }
 }

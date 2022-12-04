@@ -2,7 +2,8 @@
   "packages": [
     "packages/*",
     "probes/*",
-    "plugins/*"
+    "plugins/*",
+    "notifications/*"
   ],
   "version": "0.0.1",
   "npmClient": "yarn",

@@ -17,7 +17,8 @@
   "workspaces": [
     "packages/*",
     "probes/*",
-    "plugins/*"
+    "plugins/*",
+    "notifications/*"
   ],
   "scripts": {
     "boot": "lerna bootstrap",
