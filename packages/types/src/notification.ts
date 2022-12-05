@@ -41,14 +41,14 @@ export class Alerts {
  * alert
  */
 export interface Alert {
-  level: Level,
+  priority: Priority,
   id?: string,
   mark:string,
   title: string,
   body?: string,
 }
 
-export enum Level {
+export enum Priority {
   P1 = 'P1',
   P2 = 'P2',
   P3 = 'P3',

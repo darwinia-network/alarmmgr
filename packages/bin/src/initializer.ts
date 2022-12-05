@@ -1,9 +1,10 @@
-import {ProbeCenter} from "./plugins/probe_center";
+import {InstanceCenter} from "./plugins/probe_center";
 import {Bridge, BridgeS2SProbe} from "alarmmgr-probe-s2s";
 import {kvsEnvStorage} from "@kvs/env";
 import {KvsLocalStorage} from "@kvs/node-localstorage";
 import {KvStorageSchema} from "alarmmgr-types";
 import {SubstrateChainLiveProbe} from "alarmmgr-probe-chain-substrate/src";
+import {SlackNotification} from "alarmmgr-notification-slack";
 
 
 export class Initializer {
@@ -22,7 +23,7 @@ export class Initializer {
       {name: 'bridge-pangolin-pangolinparachain', bridge: Bridge.PangolinPangolinParachain},
     ];
     for (const probe of bridgeS2SProbes) {
-      ProbeCenter.register(probe.name, new BridgeS2SProbe({bridge: probe.bridge}));
+      InstanceCenter.registerProbe(probe.name, new BridgeS2SProbe({bridge: probe.bridge}));
     }
 
     // init substrate chain
@@ -31,10 +32,16 @@ export class Initializer {
       {name: 'substrate-pangoro', endpoint: 'https://pangoro-rpc.darwinia.network'},
     ];
     for (const probe of substrateChainProbes) {
-      ProbeCenter.register(probe.name, new SubstrateChainLiveProbe(probe))
+      InstanceCenter.registerProbe(probe.name, new SubstrateChainLiveProbe(probe))
     }
 
-    // init substrate chain probes
+    // init notifications
+    InstanceCenter.addNotifications([
+      new SlackNotification({
+        endpoint: process.env.SLACK_WEBHOOK_URL,
+        channel: '#darwinia-alert-notification',
+      }),
+    ]);
   }
 
   public static async initKvdb(): Promise<KvsLocalStorage<KvStorageSchema>> {

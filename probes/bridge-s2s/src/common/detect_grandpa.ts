@@ -1,7 +1,7 @@
 import {SoloWithSoloArg} from "../types/inner";
 import {logger} from "alarmmgr-logger";
 import {BridgeS2SNextRelayBlock, Subquery} from "alarmmgr-subquery";
-import {Alert, Alerts, Level} from "alarmmgr-types";
+import {Alert, Alerts, Priority} from "alarmmgr-types";
 
 export class S2SBridgeProbeDetectGrandpa {
 
@@ -65,7 +65,7 @@ export class S2SBridgeProbeDetectGrandpa {
       const missing = nextMandatory.blockNumber - bestFinalizedBlockNumber;
       if (missing > this.maxAllowMissingBlock) {
         alerts.push({
-          level: Level.P1,
+          priority: Priority.P1,
           mark,
           title: `${sourceChain.bridge_chain_name} -> ${targetChain.bridge_chain_name} mandatory header stopped`,
           body: `last relayed: ${bestFinalizedBlockNumber}, mandatory: ${nextMandatory.blockNumber}`,
@@ -73,7 +73,7 @@ export class S2SBridgeProbeDetectGrandpa {
       } else {
         if (missing > this.maxAllowMissingBlock / 2) {
           alerts.push({
-            level: Level.P2,
+            priority: Priority.P2,
             mark,
             title: `${sourceChain.bridge_chain_name} -> ${targetChain.bridge_chain_name} mandatory header missing block > ${this.maxAllowMissingBlock / 2}`,
             body: `relayed: ${bestFinalizedBlockNumber}, mandatory: ${nextMandatory.blockNumber}`,
@@ -92,7 +92,7 @@ export class S2SBridgeProbeDetectGrandpa {
       const missing = nextOnDemand.blockNumber - nextOnDemand.blockNumber;
       if (missing > this.maxAllowMissingBlock) {
         alerts.push({
-          level: Level.P1,
+          priority: Priority.P1,
           mark,
           title: `${sourceChain.bridge_chain_name} -> ${targetChain.bridge_chain_name} on-demand header stopped`,
           body: `relayed: ${bestFinalizedBlockNumber}, on-demand: ${nextOnDemand.blockNumber}`,
@@ -100,7 +100,7 @@ export class S2SBridgeProbeDetectGrandpa {
       } else {
         if (missing > this.maxAllowMissingBlock / 2) {
           alerts.push({
-            level: Level.P2,
+            priority: Priority.P2,
             mark,
             title: `${sourceChain.bridge_chain_name} -> ${targetChain.bridge_chain_name} on-demand header missing block > ${this.maxAllowMissingBlock / 2}`,
             body: `relayed: ${bestFinalizedBlockNumber}, on-demand: ${nextOnDemand.blockNumber}`,

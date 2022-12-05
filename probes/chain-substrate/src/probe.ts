@@ -1,5 +1,5 @@
 import {AlarmProbe} from "alarmmgr-probe-traits";
-import {Alert, Alerts, Level, Lifecycle} from "alarmmgr-types";
+import {Alert, Alerts, Priority, Lifecycle} from "alarmmgr-types";
 import {SubstrateClientInstance} from "alarmmgr-plugin-conn-substrate/src";
 
 export class SubstrateChainLiveProbe implements AlarmProbe {
@@ -40,7 +40,7 @@ export class SubstrateChainLiveProbe implements AlarmProbe {
       if (cachedLastBlock.blockNumber == lastBlockNumber &&
         now - cachedLastBlock.time > this.maxAllowStoppedTimeOfSeconds * 1000) {
         alerts.push({
-          level: Level.P1,
+          priority: Priority.P1,
           mark: markLastBlock,
           title: `the chain stopped: ${this.config.endpoint}`,
           body: `last block is ${lastBlockNumber}`,
@@ -51,7 +51,7 @@ export class SubstrateChainLiveProbe implements AlarmProbe {
       if (cachedFinalizedHead.blockHash == finalizedHead &&
         now - cachedFinalizedHead.time > this.maxAllowStoppedTimeOfSeconds * 1000) {
         alerts.push({
-          level: Level.P1,
+          priority: Priority.P1,
           mark: markLastFinalizedHead,
           title: `the chain finalized stopped: ${this.config.endpoint}`,
           body: `last finalized block hash is ${finalizedHead}`,

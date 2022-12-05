@@ -1,7 +1,7 @@
 import Timeout from 'await-timeout';
 import {logger} from 'alarmmgr-logger';
-import {Alert, Level, Lifecycle} from 'alarmmgr-types';
-import {ProbeCenter} from "../plugins/probe_center";
+import {Alert, Priority, Lifecycle} from 'alarmmgr-types';
+import {InstanceCenter} from "../plugins/probe_center";
 import {Initializer} from "../initializer";
 import {AlarmProbe} from "alarmmgr-probe-traits";
 
@@ -32,7 +32,7 @@ export class StartHandler {
     const alerts = [];
     for (const probeName of this.probes) {
       logger.debug(`start with probe -> ${probeName}`);
-      const probe = ProbeCenter.probe(probeName);
+      const probe = InstanceCenter.getProbe(probeName);
       if (!probe) {
         logger.warn(`not found probe: [${probeName}], please register it.`);
         continue;
@@ -44,6 +44,12 @@ export class StartHandler {
       });
       await Timeout.set(1000);
       alerts.push(..._alerts);
+    }
+    const notifications = InstanceCenter.getNotifications();
+    for (const notification of notifications) {
+      await notification.notify([
+        {priority: Priority.P3, mark: 'test-notification', title: 'test notification', body: 'this is test notification.'}
+      ]);
     }
   }
 
@@ -59,7 +65,7 @@ export class StartHandler {
       alerts.push(..._alerts);
     } catch (e) {
       alerts.push({
-        level: Level.P2,
+        level: Priority.P2,
         mark: `probe-call-failed-${name}`,
         title: `call probe ${name} failed`,
         body: `exception trace: ${e}`,

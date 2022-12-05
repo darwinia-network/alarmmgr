@@ -1,5 +1,5 @@
 import {SoloWithSoloArg} from "../types/inner";
-import {Alert, Alerts, Level, Lifecycle} from "alarmmgr-types";
+import {Alert, Alerts, Priority, Lifecycle} from "alarmmgr-types";
 
 export class S2SBridgeProbeDetectMessage {
 
@@ -68,7 +68,7 @@ export class S2SBridgeProbeDetectMessage {
       const gap = now - (+firstStoreTime);
       if (gap > this.maxAllowGapMinutes) {
         alerts.push({
-          level: Level.P1,
+          priority: Priority.P1,
           mark,
           title: `${sourceChain.bridge_chain_name} to ${targetChain.bridge_chain_name} message delivery stopped`,
           body: `progress: [${targetChainInboundLaneData.lastConfirmedNonce}/${sourceChainOutboundLaneData.latestGeneratedNonce}], stopped ${gap / 1000 / 60} minutes.`
@@ -76,7 +76,7 @@ export class S2SBridgeProbeDetectMessage {
       } else {
         if (gap > this.maxAllowGapMinutes / 2) {
           alerts.push({
-            level: Level.P2,
+            priority: Priority.P2,
             mark,
             title: `${sourceChain.bridge_chain_name} to ${targetChain.bridge_chain_name} message delivery maybe stopped`,
             body: `progress: [${targetChainInboundLaneData.lastConfirmedNonce}/${sourceChainOutboundLaneData.latestGeneratedNonce}], stopped ${gap / 1000 / 60} minutes.`
@@ -103,7 +103,7 @@ export class S2SBridgeProbeDetectMessage {
       const gap = now - (+firstStoreTime);
       if (gap > this.maxAllowGapMinutes) {
         alerts.push({
-          level: Level.P1,
+          priority: Priority.P1,
           mark,
           title: `${sourceChain.bridge_chain_name} to ${targetChain.bridge_chain_name} message receiving stopped`,
           body: `progress: [${sourceChainOutboundLaneData.latestReceivedNonce}/${sourceChainOutboundLaneData.latestGeneratedNonce}], stopped ${gap / 1000 / 60} minutes.`
@@ -111,7 +111,7 @@ export class S2SBridgeProbeDetectMessage {
       } else {
         if (gap > this.maxAllowGapMinutes / 2) {
           alerts.push({
-            level: Level.P2,
+            priority: Priority.P2,
             mark,
             title: `${sourceChain.bridge_chain_name} to ${targetChain.bridge_chain_name} message receiving maybe stopped`,
             body: `progress: [${sourceChainOutboundLaneData.latestReceivedNonce}/${sourceChainOutboundLaneData.latestGeneratedNonce}], stopped ${gap / 1000 / 60} minutes.`
