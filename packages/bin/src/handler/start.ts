@@ -4,6 +4,7 @@ import {Alert, Priority, Lifecycle} from 'alarmmgr-types';
 import {InstanceCenter} from "../plugins/probe_center";
 import {Initializer} from "../initializer";
 import {AlarmProbe} from "alarmmgr-probe-traits";
+import {PeriodicNotification} from "../plugins/periodic_notification";
 
 export class StartHandler {
   constructor(
@@ -46,11 +47,7 @@ export class StartHandler {
       alerts.push(..._alerts);
     }
     const notifications = InstanceCenter.getNotifications();
-    for (const notification of notifications) {
-      await notification.notify([
-        {priority: Priority.P3, mark: 'test-notification', title: 'test notification', body: 'this is test notification.'}
-      ]);
-    }
+    await new PeriodicNotification(notifications).notify(alerts);
   }
 
   private async callProbe(options: {
