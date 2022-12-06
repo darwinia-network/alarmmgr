@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
-import StartCommand from "./command/start";
+import ListenCommand from "./command/listen";
 import {Initializer} from "./initializer";
 
 
@@ -17,7 +17,7 @@ function main() {
     .usage('alarmmgr <hello@darwinia.network>')
     .help('help').alias('help', 'h')
     .version('version', "0.0.1").alias('version', 'V')
-    .command(StartCommand)
+    .command(ListenCommand)
     .argv;
 
   // show help if no input

@@ -1,16 +1,16 @@
 import yargs from 'yargs';
-import {StartHandler} from "../handler/start";
+import {ListenHandler} from "../handler/listen";
 
 
 const StartCommand: yargs.CommandModule = {
   builder: (argv: yargs.Argv) => {
     return argv.array('probe');
   },
-  command: 'start',
-  describe: 'Start alarmmgr monitor',
+  command: 'listen',
+  describe: 'Probe listen',
   handler: async (args: yargs.Arguments) => {
     const {probe} = args;
-    const handler = new StartHandler(probe as unknown as Array<string>);
+    const handler = new ListenHandler(probe as unknown as Array<string>);
     await handler.start();
   },
 }

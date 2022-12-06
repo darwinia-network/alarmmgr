@@ -6,7 +6,7 @@ import {Initializer} from "../initializer";
 import {AlarmProbe} from "alarmmgr-probe-traits";
 import {PeriodicNotification} from "../plugins/periodic_notification";
 
-export class StartHandler {
+export class ListenHandler {
   constructor(
     /**
      * probe bridges
