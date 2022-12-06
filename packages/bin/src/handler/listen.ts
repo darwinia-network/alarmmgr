@@ -63,9 +63,9 @@ export class ListenHandler {
     } catch (e) {
       alerts.push({
         priority: Priority.P2,
-        mark: `probe-call-failed-${name}`,
-        title: `call probe ${name} failed`,
-        body: `exception trace: ${e}`,
+        mark: `call-probe-failed-${name}`,
+        title: `failed to call probe ${name}`,
+        body: `${e}`,
       });
     }
     logger.info(`[${name}] alerts: {}`, alerts);
