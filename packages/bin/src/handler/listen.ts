@@ -11,7 +11,7 @@ export class ListenHandler {
     /**
      * probe bridges
      */
-    private readonly probes: Array<string>,
+    private readonly probes?: Array<string>,
   ) {
   }
 
@@ -30,6 +30,10 @@ export class ListenHandler {
   }
 
   private async run(lifecycle: Lifecycle): Promise<void> {
+    if (!this.probes) {
+      logger.warn('not have any probes');
+      return;
+    }
     const alerts = [];
     for (const probeName of this.probes) {
       logger.debug(`start with probe -> ${probeName}`);
