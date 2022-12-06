@@ -1,0 +1,20 @@
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  check-alarmmgr:
+    name: Check alarmmgr
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Check build
+        run: |
+          npm run boot
+          npm run build:all
