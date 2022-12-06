@@ -1,6 +1,6 @@
 import Timeout from 'await-timeout';
 import {logger} from 'alarmmgr-logger';
-import {Alert, Priority, Lifecycle} from 'alarmmgr-types';
+import {Alert, Lifecycle, Priority} from 'alarmmgr-types';
 import {InstanceCenter} from "../plugins/probe_center";
 import {Initializer} from "../initializer";
 import {AlarmProbe} from "alarmmgr-probe-traits";
@@ -47,7 +47,7 @@ export class StartHandler {
       alerts.push(..._alerts);
     }
     const notifications = InstanceCenter.getNotifications();
-    await new PeriodicNotification(notifications).notify(alerts);
+    await new PeriodicNotification({notifications, lifecycle}).notify(alerts);
   }
 
   private async callProbe(options: {
@@ -62,7 +62,7 @@ export class StartHandler {
       alerts.push(..._alerts);
     } catch (e) {
       alerts.push({
-        level: Priority.P2,
+        priority: Priority.P2,
         mark: `probe-call-failed-${name}`,
         title: `call probe ${name} failed`,
         body: `exception trace: ${e}`,
