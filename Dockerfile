@@ -5,4 +5,4 @@ RUN cd /opt/alarmmgr && \
     npm run boot && \
     npm run build:all
 WORKDIR /opt/alarmmgr
-ENTRYPOINT ["alarmmgr.sh"]
+ENTRYPOINT ["/opt/alarmmgr/alarmmgr.sh"]
