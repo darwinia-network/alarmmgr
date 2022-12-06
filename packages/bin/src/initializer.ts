@@ -21,6 +21,7 @@ export class Initializer {
       {name: 'bridge-pangolin-pangoro', bridge: Bridge.PangolinPangoro},
       {name: 'bridge-darwinia-crab', bridge: Bridge.DarwiniaCrab},
       {name: 'bridge-pangolin-pangolinparachain', bridge: Bridge.PangolinPangolinParachain},
+      {name: 'bridge-crab-crabparachain', bridge: Bridge.CrabCrabParachain},
     ];
     for (const probe of bridgeS2SProbes) {
       InstanceCenter.registerProbe(probe.name, new BridgeS2SProbe({bridge: probe.bridge}));
@@ -30,6 +31,10 @@ export class Initializer {
     const substrateChainProbes = [
       {name: 'substrate-pangolin', endpoint: 'https://pangolin-rpc.darwinia.network'},
       {name: 'substrate-pangoro', endpoint: 'https://pangoro-rpc.darwinia.network'},
+      {name: 'substrate-darwinia', endpoint: 'https://rpc.darwinia.network'},
+      {name: 'substrate-crab', endpoint: 'https://crab-rpc.darwinia.network'},
+      {name: 'substrate-crab-parachain', endpoint: 'https://crab-parachain-rpc.darwinia.network'},
+      {name: 'substrate-darwinia-parachain', endpoint: 'https://parachain-rpc.darwinia.network'},
     ];
     for (const probe of substrateChainProbes) {
       InstanceCenter.registerProbe(probe.name, new SubstrateChainLiveProbe(probe))
