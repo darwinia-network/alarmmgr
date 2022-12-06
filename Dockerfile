@@ -5,9 +5,4 @@ RUN cd /opt/alarmmgr && \
     npm run boot && \
     npm run build:all
 WORKDIR /opt/alarmmgr
-CMD [
-  "npm",
-  "run",
-  "start",
-  "--"
-]
+CMD ["npm", "run", "start", "--"]
