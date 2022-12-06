@@ -1,0 +1,25 @@
+{
+  "name": "alarmmgr-probe-chain-substrate",
+  "version": "0.0.1",
+  "description": "Alarmmgr",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest"
+  },
+  "author": "Darwinia Network <hello@darwinia.network>",
+  "license": "GPLv3",
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "alarmmgr-logger": "0.0.1",
+    "alarmmgr-types": "0.0.1",
+    "alarmmgr-probe-traits": "0.0.1",
+    "alarmmgr-plugin-conn-substrate": "0.0.1",
+    "@darwinia/api-options": "^2.8.10",
+    "@polkadot/api": "^9.4.2",
+    "await-timeout": "^1.1.1"
+  }
+}

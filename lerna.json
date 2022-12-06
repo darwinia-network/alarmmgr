@@ -1,0 +1,12 @@
+{
+  "packages": [
+    "packages/*",
+    "probes/*",
+    "plugins/*",
+    "notifications/*"
+  ],
+  "version": "0.0.1",
+  "npmClient": "yarn",
+  "useNx": true,
+  "useWorkspaces": true
+}
