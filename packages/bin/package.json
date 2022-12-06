@@ -3,10 +3,11 @@
   "version": "0.0.1",
   "description": "Alarmmgr bin",
   "main": "build/index.js",
+  "bin": "build/index.js",
   "scripts": {
     "build": "tsc -b",
     "start": "ts-node src/index.ts",
-    "package": "tsc -b && ncc build --source-map",
+    "package": "tsc -b && ncc build",
     "test": "jest"
   },
   "author": "Darwinia Network <hello@darwinia.network>",

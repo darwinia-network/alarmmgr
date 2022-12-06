@@ -11,9 +11,9 @@ node_modules
 
 generated
 
-metadata.scale
 *.dep.txt
 *.log
+*-bin-*
 
 package-lock.json
 yarn.lock
