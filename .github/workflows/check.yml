@@ -17,4 +17,4 @@ jobs:
       - name: Check build
         run: |
           npm run boot
-          npm run buld:all
+          npm run build:all
