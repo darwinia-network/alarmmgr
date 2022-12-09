@@ -29,6 +29,7 @@
     "alarmmgr-probe-traits": "0.0.1",
     "alarmmgr-probe-s2s": "0.0.1",
     "alarmmgr-probe-e2e": "0.0.1",
+    "alarmmgr-probe-http": "0.0.1",
     "alarmmgr-probe-chain-substrate": "0.0.1",
     "alarmmgr-notification-traits": "0.0.1",
     "alarmmgr-notification-slack": "0.0.1",
