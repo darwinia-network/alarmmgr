@@ -24,7 +24,6 @@ export class HttpProbe implements AlarmProbe {
     const mark = `${this.name}-${this.url}`;
 
     if (this.validator !== undefined) {
-      console.log('validator!!!')
       const [ok, reason] = await this.validator(response);
       if (ok) {
         return []
