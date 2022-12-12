@@ -1,0 +1,22 @@
+{
+  "name": "alarmmgr-probe-http",
+  "version": "0.0.1",
+  "description": "Alarmmgr for http",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest"
+  },
+  "author": "Darwinia Network <hello@darwinia.network>",
+  "license": "GPLv3",
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "alarmmgr-probe-traits": "0.0.1",
+    "alarmmgr-types": "0.0.1",
+    "await-timeout": "^1.1.1",
+    "node-fetch": "2"
+  }
+}

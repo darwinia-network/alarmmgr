@@ -5,6 +5,7 @@ import {KvsLocalStorage} from "@kvs/node-localstorage";
 import {KvStorageSchema} from "alarmmgr-types";
 import {SubstrateChainLiveProbe} from "alarmmgr-probe-chain-substrate/src";
 import {SlackNotification} from "alarmmgr-notification-slack";
+import {HttpProbe} from "alarmmgr-probe-http";
 
 
 export class Initializer {
@@ -38,6 +39,15 @@ export class Initializer {
     ];
     for (const probe of substrateChainProbes) {
       InstanceCenter.registerProbe(probe.name, new SubstrateChainLiveProbe(probe))
+    }
+
+    // init http probes
+    const httpProbes = [
+      {name: 'api-supply-ring', url: 'https://api.darwinia.network/supply/ring',},
+      {name: 'apps-darwinia', url: 'https://apps.darwinia.network',},
+    ];
+    for (const probe of httpProbes) {
+      InstanceCenter.registerProbe(probe.name, new HttpProbe(probe))
     }
 
     // init notifications
