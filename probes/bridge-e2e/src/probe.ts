@@ -2,7 +2,7 @@ import { AlarmProbe } from "alarmmgr-probe-traits";
 import { Lifecycle, Alert, Alerts } from "alarmmgr-types";
 import { ethers } from "ethers";
 import { BeaconLightClient, ExecutionLayer, Inbound, Outbound, POSALightClient } from "../types/ethers-contracts";
-import { BeaconLightClient__factory, ExecutionLayer__factory, Inbound__factory, Outbound__factory } from "../types/ethers-contracts/factories";
+import { BeaconLightClient__factory, ExecutionLayer__factory, Inbound__factory, Outbound__factory, POSALightClient__factory } from "../types/ethers-contracts/factories";
 
 
 export class BridgeE2eProbe implements AlarmProbe {
@@ -148,6 +148,10 @@ export class ExecutionLayerClient {
   outbound: Outbound;
   posaLightClient: POSALightClient;
 
-  constructor() {
+  constructor(config: ExecutionLayerConfig) {
+    const provider = new ethers.providers.JsonRpcProvider(config.endpoint);
+    this.inbound = Inbound__factory.connect(config.inboundAddress, provider);
+    this.outbound = Outbound__factory.connect(config.outboundAddress, provider);
+    this.posaLightClient = POSALightClient__factory.connect(config.posaLightClientAddress, provider);
   };
 }
