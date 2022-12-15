@@ -2,19 +2,24 @@
   "name": "alarmmgr-probe-e2e",
   "version": "0.0.1",
   "description": "Alarmmgr",
-  "main": "build/index.js",
+  "main": "build/src/index.js",
   "scripts": {
     "build": "tsc -b",
+    "postinstall": "yarn typechain --target ethers-v5 src/abis/*.json",
     "test": "jest"
   },
   "author": "Darwinia Network <hello@darwinia.network>",
   "license": "GPLv3",
   "devDependencies": {
+    "@dethcrypto/eth-sdk": "^0.3.3",
+    "@dethcrypto/eth-sdk-client": "^0.1.6",
     "@types/node": "^18.11.9",
+    "typechain": "^8.1.1",
     "typescript": "^4.8.4"
   },
   "dependencies": {
     "alarmmgr-logger": "0.0.1",
-    "alarmmgr-probe-traits": "0.0.1"
+    "alarmmgr-probe-traits": "0.0.1",
+    "ethers": "^5.7.2"
   }
 }
