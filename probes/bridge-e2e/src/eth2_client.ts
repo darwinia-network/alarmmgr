@@ -58,7 +58,6 @@ export class Eth2Client {
 
   async get_checkpoint(id: string) {
     const url = `${this.endpoint}/eth/v1/beacon/states/${id}/finality_checkpoints`
-    const headers = { 'accept': 'application/json' }
     const response = await fetch(url)
     const data = await response.json()
     return data.data
@@ -66,7 +65,6 @@ export class Eth2Client {
 
   async get_bootstrap(block_root: string) {
     const url = `${this.endpoint}/eth/v1/beacon/light_client/bootstrap/${block_root}`
-    const headers = { 'accept': 'application/json' }
     const response = await fetch(url)
     const data = await response.json()
     return data.data
