@@ -6,65 +6,65 @@ export class Eth2Client {
     this.endpoint = endpoint
   }
 
-  async get_finalized_header() {
-    return await this.get_header('finalized')
+  async getFinalizedHeader() {
+    return await this.getHeader('finalized')
   }
 
-  async get_header(id: string) {
+  async getHeader(id: string) {
     const url = `${this.endpoint}/eth/v1/beacon/headers/${id}`
     const response = await fetch(url)
     const data = await response.json()
     return data.data
   }
 
-  async get_sync_committee(epoch: string) {
+  async getSyncCommittee(epoch: string) {
     const url = `${this.endpoint}/eth/v1/beacon/states/finalized/sync_committees?epoch=${epoch}`
     const response = await fetch(url)
     const data = await response.json()
     return data.data
   }
 
-  async get_beacon_block(id: string) {
+  async getBeaconBlock(id: string) {
     const url = `${this.endpoint}/eth/v2/beacon/blocks/${id}`
     const response = await fetch(url)
     const data = await response.json()
     return data.data.message
   }
 
-  async get_beacon_block_root(id: string) {
+  async getBeaconBlockRoot(id: string) {
     const url = `${this.endpoint}/eth/v1/beacon/blocks/${id}/root`
     const response = await fetch(url)
     const data = await response.json()
     return data.data
   }
 
-  async get_genesis() {
+  async getGenesis() {
     const url = `${this.endpoint}/eth/v1/beacon/genesis`
     const response = await fetch(url)
     const data = await response.json()
     return data
   }
 
-  async get_fork_version(id: string) {
+  async getForkVersion(id: string) {
     const url = `${this.endpoint}/eth/v1/beacon/states/${id}/fork`
     const response = await fetch(url)
     const data = await response.json()
     return data.data
   }
 
-  async get_finalized_checkpoint() {
-    return this.get_checkpoint('finalized')
+  async getFinalizedCheckpoint() {
+    return this.getCheckpoint('finalized')
   }
 
-  async get_checkpoint(id: string) {
+  async getCheckpoint(id: string) {
     const url = `${this.endpoint}/eth/v1/beacon/states/${id}/finality_checkpoints`
     const response = await fetch(url)
     const data = await response.json()
     return data.data
   }
 
-  async get_bootstrap(block_root: string) {
-    const url = `${this.endpoint}/eth/v1/beacon/light_client/bootstrap/${block_root}`
+  async getBootstrap(blockRoot: string) {
+    const url = `${this.endpoint}/eth/v1/beacon/light_client/bootstrap/${blockRoot}`
     const response = await fetch(url)
     const data = await response.json()
     return data.data
