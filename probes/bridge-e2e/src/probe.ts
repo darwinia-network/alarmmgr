@@ -1,8 +1,9 @@
 import { AlarmProbe } from "alarmmgr-probe-traits";
-import { Lifecycle, Alert, Alerts } from "alarmmgr-types";
-import { ethers } from "ethers";
+import { Lifecycle, Alert, Alerts, Priority } from "alarmmgr-types";
+import { BigNumber, ethers } from "ethers";
 import { BeaconLightClient, ExecutionLayer, Inbound, Outbound, POSALightClient } from "../types/ethers-contracts";
 import { BeaconLightClient__factory, ExecutionLayer__factory, Inbound__factory, Outbound__factory, POSALightClient__factory } from "../types/ethers-contracts/factories";
+import { Eth2Client } from "./eth2_client";
 
 
 export class BridgeE2eProbe implements AlarmProbe {
@@ -34,26 +35,6 @@ export class BridgeE2eProbe implements AlarmProbe {
   }
 }
 
-// console.log(`hello`)
-// const RPC_HOST = 'https://rpc.darwinia.network'
-// const DAI_ADDRESS = '0xD2A37C4523542F2dFD7Cb792D2aeAd5c61C1bAAE'
-
-// async function main() {
-//   console.log(`hello`)
-//   const provider = new ethers.providers.JsonRpcProvider(RPC_HOST)
-//   const beacon = BeaconLightClient__factory.connect(DAI_ADDRESS, provider)
-//   const header = await beacon.finalized_header()
-//   const data = await beacon.sync_committee_roots(header.slot.div(32).div(256))
-
-//   console.log(`header : ${header}`)
-//   console.log(`root : ${data}`)
-// }
-
-// main().catch((e) => {
-//   console.error(e)
-//   process.exit(1)
-// })
-
 export interface BridgeE2eConfig {
   darwiniaSubstrateEndpoint: string,
   beaconEndpoint: string,
@@ -69,44 +50,64 @@ export class BridgeE2E {
   private readonly config: BridgeE2eConfig;
   private readonly darwiniaEvmClient: DarwiniaEvmClient;
   private readonly executionLayerClient: ExecutionLayerClient;
+  private readonly ethApiClient: Eth2Client;
 
   constructor(option: BridgeE2eConfig) {
-    this.config = option
+    this.config = option;
+    this.darwiniaEvmClient = new DarwiniaEvmClient(option.darwiniaEvm);
+    this.executionLayerClient = new ExecutionLayerClient(option.executionLayer);
+    this.ethApiClient = new Eth2Client(option.beaconEndpoint);
   }
 
-  async beacon_header_relay_detect(): Promise<Alert[]> {
+  async beaconHeaderRelayDetect(): Promise<Alert[]> {
+    const alerts = Alerts.create();
+    // 600 slot is about 2 hour.
+    const MAX_ALLOWED_DELAY = BigNumber.from(600);
+    const latest = await this.ethApiClient.getHeader('head');
+    const latestSlot = BigNumber.from(latest.header.message.slot);
+    const relayed = await this.darwiniaEvmClient.beaconLightClient.finalized_header();
+    const delay = latestSlot.sub(relayed.slot);
+    console.log(`Current: ${latestSlot}, Relayed: ${relayed.slot}, Delay: ${delay}`);
+    if (delay > MAX_ALLOWED_DELAY) {
+      console.log("Delay too much");
+      alerts.push({
+        priority: Priority.P1,
+        mark: `Bridge Eth<>Darwinia beacon header relay has stopped since ${relayed.slot} `,
+        title: "Eth->Darwinia beacon header relay stopped",
+      })
+    }
+    return alerts.alerts();
+  }
+
+  async executionLayerRelayDetect(): Promise<Alert[]> {
     throw new Error("Function not implemented.");
   }
 
-  async execution_layer_relay_detect(): Promise<Alert[]> {
+  async syncCommitteeRelayDetect(): Promise<Alert[]> {
     throw new Error("Function not implemented.");
   }
 
-  async sync_committee_relay_detect(): Promise<Alert[]> {
+  async ecdsaMessagesSigningDetect(): Promise<Alert[]> {
     throw new Error("Function not implemented.");
   }
 
-  async ecdsa_messages_signing_detect(): Promise<Alert[]> {
+  async ecdsaAuthoritiesSigningDetect(): Promise<Alert[]> {
     throw new Error("Function not implemented.");
   }
 
-  async ecdsa_authorities_signing_detect(): Promise<Alert[]> {
+  async ecdsaMessagesSigningRelayDetect(): Promise<Alert[]> {
     throw new Error("Function not implemented.");
   }
 
-  async ecdsa_messages_signing_relay_detect(): Promise<Alert[]> {
+  async ecdsaAuthoritiesSigningRelayDetect(): Promise<Alert[]> {
     throw new Error("Function not implemented.");
   }
 
-  async ecdsa_authorities_signing_relay_detect(): Promise<Alert[]> {
+  async darwiniaMessagesDetect(): Promise<Alert[]> {
     throw new Error("Function not implemented.");
   }
 
-  async darwinia_messages_detect(): Promise<Alert[]> {
-    throw new Error("Function not implemented.");
-  }
-
-  async eth_messages_detect(): Promise<Alert[]> {
+  async ethMessagesDetect(): Promise<Alert[]> {
     throw new Error("Function not implemented.");
   }
 }
