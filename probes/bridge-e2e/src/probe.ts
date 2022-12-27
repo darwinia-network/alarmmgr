@@ -1,6 +1,6 @@
 import { AlarmProbe } from "alarmmgr-probe-traits";
 import { Lifecycle, Alert, Alerts, Priority } from "alarmmgr-types";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber, ethers, providers } from "ethers";
 import { BeaconLightClient, ExecutionLayer, Inbound, Outbound, POSALightClient } from "../types/ethers-contracts";
 import { BeaconLightClient__factory, ExecutionLayer__factory, Inbound__factory, Outbound__factory, POSALightClient__factory } from "../types/ethers-contracts/factories";
 import { Eth2Client } from "./eth2_client";
@@ -60,9 +60,10 @@ export class BridgeE2E {
   }
 
   async beaconHeaderRelayDetect(): Promise<Alert[]> {
-    const alerts = Alerts.create();
     // 600 slot is about 2 hour.
     const MAX_ALLOWED_DELAY = BigNumber.from(600);
+
+    const alerts = Alerts.create();
     const latest = await this.ethApiClient.getHeader('head');
     const latestSlot = BigNumber.from(latest.header.message.slot);
     const relayed = await this.darwiniaEvmClient.beaconLightClient.finalized_header();
@@ -80,7 +81,22 @@ export class BridgeE2E {
   }
 
   async executionLayerRelayDetect(): Promise<Alert[]> {
-    throw new Error("Function not implemented.");
+    // 600 blocks is about 2 hour.
+    const MAX_ALLOWED_DELAY = BigNumber.from(600);
+
+    const alerts = Alerts.create();
+    const relayed = await this.darwiniaEvmClient.executionLayer.block_number();
+    const current = await this.executionLayerClient.provider.getBlockNumber();
+    const delay = BigNumber.from(current).sub(relayed);
+    console.log(`Current: ${current}, Relayed: ${relayed}, Delay: ${delay}`);
+    if (delay > MAX_ALLOWED_DELAY) {
+      alerts.push({
+        priority: Priority.P1,
+        mark: `Bridge Eth<>Darwinia execution layer relay has stopped since ${relayed}`,
+        title: "Eth->Darwinia execution layer relay stopped",
+      })
+    }
+    return alerts.alerts();
   }
 
   async syncCommitteeRelayDetect(): Promise<Alert[]> {
@@ -130,29 +146,31 @@ export interface ExecutionLayerConfig {
 }
 
 export class DarwiniaEvmClient {
+  provider: providers.JsonRpcProvider;
   inbound: Inbound;
   outbound: Outbound;
   beaconLightClient: BeaconLightClient;
   executionLayer: ExecutionLayer;
 
   constructor(config: DarwiniaEvmConfig) {
-    const provider = new ethers.providers.JsonRpcProvider(config.endpoint);
-    this.inbound = Inbound__factory.connect(config.inboundAddress, provider);
-    this.outbound = Outbound__factory.connect(config.outboundAddress, provider);
-    this.beaconLightClient = BeaconLightClient__factory.connect(config.beaconLightClientAddress, provider);
-    this.executionLayer = ExecutionLayer__factory.connect(config.executionLaterAddress, provider);
+    this.provider = new ethers.providers.JsonRpcProvider(config.endpoint);
+    this.inbound = Inbound__factory.connect(config.inboundAddress, this.provider);
+    this.outbound = Outbound__factory.connect(config.outboundAddress, this.provider);
+    this.beaconLightClient = BeaconLightClient__factory.connect(config.beaconLightClientAddress, this.provider);
+    this.executionLayer = ExecutionLayer__factory.connect(config.executionLaterAddress, this.provider);
   };
 }
 
 export class ExecutionLayerClient {
+  provider: providers.JsonRpcProvider;
   inbound: Inbound;
   outbound: Outbound;
   posaLightClient: POSALightClient;
 
   constructor(config: ExecutionLayerConfig) {
-    const provider = new ethers.providers.JsonRpcProvider(config.endpoint);
-    this.inbound = Inbound__factory.connect(config.inboundAddress, provider);
-    this.outbound = Outbound__factory.connect(config.outboundAddress, provider);
-    this.posaLightClient = POSALightClient__factory.connect(config.posaLightClientAddress, provider);
+    this.provider = new ethers.providers.JsonRpcProvider(config.endpoint);
+    this.inbound = Inbound__factory.connect(config.inboundAddress, this.provider);
+    this.outbound = Outbound__factory.connect(config.outboundAddress, this.provider);
+    this.posaLightClient = POSALightClient__factory.connect(config.posaLightClientAddress, this.provider);
   };
 }
