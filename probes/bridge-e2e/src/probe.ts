@@ -100,7 +100,20 @@ export class BridgeE2E {
   }
 
   async syncCommitteeRelayDetect(): Promise<Alert[]> {
-    throw new Error("Function not implemented.");
+    const alerts = Alerts.create();
+    const currentSlot = BigNumber.from((await this.ethApiClient.getHeader('head')).header.message.slot);
+    const currentPeriod = currentSlot.div(32).div(256);
+    const syncCommitteeRoot = await this.darwiniaEvmClient.beaconLightClient.sync_committee_roots(currentPeriod);
+    if (syncCommitteeRoot === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+      alerts.push({
+        priority: Priority.P1,
+        mark: `Bridge Eth<>Darwinia sync committee at period ${currentPeriod} hasn't been relayed`,
+        title: "Eth->Darwinia sync committee relay stopped",
+      })
+    }
+
+    console.log(`Slot ${currentSlot}, Period ${currentPeriod}, Root ${syncCommitteeRoot}`);
+    return alerts.alerts();
   }
 
   async ecdsaMessagesSigningDetect(): Promise<Alert[]> {
