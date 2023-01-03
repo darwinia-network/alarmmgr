@@ -54,7 +54,7 @@ export class PeriodicNotification implements AlarmNotification {
       /// notify multiple times
       switch (foundLast.times) {
         case 1:
-          if (now - foundLast.time > 1000 * 60 * 2) {
+          if (now - foundLast.time > 1000 * 60 * 5) {
             reorganize.push(alert);
             latestNotifications = latestNotifications.filter(latest => latest.mark != alert.mark);
             latestNotifications.push({mark: alert.mark, time: now, times: times + 1});
@@ -62,7 +62,7 @@ export class PeriodicNotification implements AlarmNotification {
           }
           break;
         case 2:
-          if (now - foundLast.time > 1000 * 60 * 5) {
+          if (now - foundLast.time > 1000 * 60 * 15) {
             reorganize.push(alert);
             latestNotifications = latestNotifications.filter(latest => latest.mark != alert.mark);
             latestNotifications.push({mark: alert.mark, time: now, times: times + 2});
@@ -70,7 +70,7 @@ export class PeriodicNotification implements AlarmNotification {
           }
           break;
         case 3:
-          if (now - foundLast.time > 1000 * 60 * 10) {
+          if (now - foundLast.time > 1000 * 60 * 40) {
             reorganize.push(alert);
             latestNotifications = latestNotifications.filter(latest => latest.mark != alert.mark);
             latestNotifications.push({mark: alert.mark, time: now, times});

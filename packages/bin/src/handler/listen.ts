@@ -65,6 +65,7 @@ export class ListenHandler {
       const _alerts = await probe.probe(lifecycle);
       alerts.push(..._alerts);
     } catch (e) {
+      console.error(e);
       alerts.push({
         priority: Priority.P2,
         mark: `call-probe-failed-${name}`,
