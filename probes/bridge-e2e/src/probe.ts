@@ -5,7 +5,7 @@ import { BigNumber, ethers, providers } from "ethers";
 import { BeaconLightClient, ExecutionLayer, Inbound, Outbound, POSALightClient } from "../types/ethers-contracts";
 import { BeaconLightClient__factory, ExecutionLayer__factory, Inbound__factory, Outbound__factory, POSALightClient__factory } from "../types/ethers-contracts/factories";
 import { Eth2Client } from "./eth2_client";
-import { CollectingMessagesEvent, EcdsaGraphql, SubstrateIndex } from "./graphql";
+import { CollectingMessagesEvent, SubstrateIndex } from "./graphql";
 
 
 export class BridgeE2eProbe implements AlarmProbe {
