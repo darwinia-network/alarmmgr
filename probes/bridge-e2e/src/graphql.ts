@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-export class EcdsaGraphql {
+export class SubstrateIndex {
   host: string;
 
   constructor(host: string) {
@@ -43,14 +43,14 @@ export type CollectingNewMessagesSignatures = {
     nodes: Array<CollectingMessagesEvent>
   }
 }
-export type CollectingMessagesEvent = { id: string, blockHash: string, blockNumber: Number, message: string };
+export type CollectingMessagesEvent = { id: string, blockHash: string, blockNumber: number, message: string };
 
 export type EnoughMessageSignatures = {
   collectedEnoughNewMessageRootSignaturesEvents: {
     nodes: Array<EnoughMessageSignaturesEvent>
   }
 }
-export type EnoughMessageSignaturesEvent = { id: string, blockHash: string, blockNumber: Number, message: string, commitmentBlockNumber: Number };
+export type EnoughMessageSignaturesEvent = { id: string, blockHash: string, blockNumber: number, message: string, commitmentBlockNumber: number };
 
 const COLLECTING_NEW_MESSAGES_SIGNATURES: string = `
 query lastCollectingNewMessageRootSignaturesEvent {

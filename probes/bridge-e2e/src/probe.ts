@@ -1,9 +1,11 @@
+import { ApiPromise, WsProvider } from "@polkadot/api";
 import { AlarmProbe } from "alarmmgr-probe-traits";
 import { Lifecycle, Alert, Alerts, Priority } from "alarmmgr-types";
 import { BigNumber, ethers, providers } from "ethers";
 import { BeaconLightClient, ExecutionLayer, Inbound, Outbound, POSALightClient } from "../types/ethers-contracts";
 import { BeaconLightClient__factory, ExecutionLayer__factory, Inbound__factory, Outbound__factory, POSALightClient__factory } from "../types/ethers-contracts/factories";
 import { Eth2Client } from "./eth2_client";
+import { CollectingMessagesEvent, EcdsaGraphql, SubstrateIndex } from "./graphql";
 
 
 export class BridgeE2eProbe implements AlarmProbe {
@@ -48,15 +50,23 @@ export interface BridgeE2eConfig {
 
 export class BridgeE2E {
   private readonly config: BridgeE2eConfig;
-  private readonly darwiniaEvmClient: DarwiniaEvmClient;
-  private readonly executionLayerClient: ExecutionLayerClient;
-  private readonly ethApiClient: Eth2Client;
+  private darwiniaEvmClient: DarwiniaEvmClient;
+  private executionLayerClient: ExecutionLayerClient;
+  private ethApiClient: Eth2Client;
+  private substrateIndex: SubstrateIndex;
+  private substrateClient: ApiPromise;
 
   constructor(option: BridgeE2eConfig) {
     this.config = option;
-    this.darwiniaEvmClient = new DarwiniaEvmClient(option.darwiniaEvm);
-    this.executionLayerClient = new ExecutionLayerClient(option.executionLayer);
-    this.ethApiClient = new Eth2Client(option.beaconEndpoint);
+  }
+
+  async setUp() {
+    this.darwiniaEvmClient = new DarwiniaEvmClient(this.config.darwiniaEvm);
+    this.executionLayerClient = new ExecutionLayerClient(this.config.executionLayer);
+    this.ethApiClient = new Eth2Client(this.config.beaconEndpoint);
+    this.substrateIndex = new SubstrateIndex(this.config.index.substrateChainEndpoint);
+    const provider = new WsProvider(this.config.darwiniaSubstrateEndpoint);
+    this.substrateClient = await ApiPromise.create({ provider });
   }
 
   async beaconHeaderRelayDetect(): Promise<Alert[]> {
@@ -117,7 +127,41 @@ export class BridgeE2E {
   }
 
   async ecdsaMessagesSigningDetect(): Promise<Alert[]> {
-    throw new Error("Function not implemented.");
+    const MAX_ALLOWED_DELAY = 600;
+    const isTooMuchDelay = (_collecting: CollectingMessagesEvent, _currentBlockNumber: number) => {
+      if (_currentBlockNumber - _collecting.blockNumber > MAX_ALLOWED_DELAY) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    const alerts = Alerts.create();
+    const collecting = await this.substrateIndex.latestCollectingMessagesSignatures();
+    const collected = await this.substrateIndex.latestCollectedMessageSignatures();
+    const currentHeader = await this.substrateClient.rpc.chain.getHeader();
+    const currentBlockNumber = currentHeader.number.toNumber();
+
+    if (collecting === null) {
+      return [];
+    }
+
+    if (collected.commitmentBlockNumber == collecting.blockNumber) {
+      return [];
+    }
+
+    if (collected === null || collected.commitmentBlockNumber != collecting.blockNumber) {
+      if (isTooMuchDelay(collecting, currentBlockNumber)) {
+        alerts.push({
+          priority: Priority.P1,
+          mark: `Bridge Eth<>Darwinia ECDSA signatures for new message root(${collecting.blockNumber}) hasn't been collected}`,
+          title: `ECDSA signatures for new message root not collected`,
+        })
+        return alerts.alerts();
+      }
+    }
+
+    return []
   }
 
   async ecdsaAuthoritiesSigningDetect(): Promise<Alert[]> {
