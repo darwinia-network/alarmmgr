@@ -5,7 +5,7 @@ import { BigNumber, ethers, providers } from "ethers";
 import { BeaconLightClient, ExecutionLayer, Inbound, Outbound, POSALightClient } from "../types/ethers-contracts";
 import { BeaconLightClient__factory, ExecutionLayer__factory, Inbound__factory, Outbound__factory, POSALightClient__factory } from "../types/ethers-contracts/factories";
 import { Eth2Client } from "./eth2_client";
-import { CollectingMessagesEvent, SubstrateIndex } from "./graphql";
+import { BasicEvent, SubstrateIndex } from "./substrate_index";
 
 
 export class BridgeE2eProbe implements AlarmProbe {
@@ -128,7 +128,7 @@ export class BridgeE2E {
 
   async ecdsaMessagesSigningDetect(): Promise<Alert[]> {
     const MAX_ALLOWED_DELAY = 600;
-    const isTooMuchDelay = (_collecting: CollectingMessagesEvent, _currentBlockNumber: number) => {
+    const isTooMuchDelay = (_collecting: BasicEvent, _currentBlockNumber: number) => {
       if (_currentBlockNumber - _collecting.blockNumber > MAX_ALLOWED_DELAY) {
         return true;
       } else {
@@ -165,7 +165,31 @@ export class BridgeE2E {
   }
 
   async ecdsaAuthoritiesSigningDetect(): Promise<Alert[]> {
-    throw new Error("Function not implemented.");
+    const MAX_ALLOWED_DELAY = 600;
+    const alerts = Alerts.create();
+    const collecting = await this.substrateIndex.latestCollectingAuthoritiesChange();
+    const collected = await this.substrateIndex.latestCollectedAuthoritiesChange();
+
+    if (collecting === null) {
+      return [];
+    }
+
+    if (collected !== null && collected.message === collecting.message) {
+      return [];
+    } else {
+      const currentHeader = await this.substrateClient.rpc.chain.getHeader();
+      const currentBlockNumber = currentHeader.number.toNumber();
+      if (currentBlockNumber - collecting.blockNumber > MAX_ALLOWED_DELAY) {
+        alerts.push({
+          priority: Priority.P1,
+          mark: `bridge-darwinia-eth-ecdsa`,
+          body: `Authorities change event hasn't collected enough signatures since ${collecting.blockNumber}`,
+          title: `ECDSA signatures for authorities change not collected`
+        });
+        return alerts.alerts();
+      }
+    }
+    return [];
   }
 
   async ecdsaMessagesSigningRelayDetect(): Promise<Alert[]> {
