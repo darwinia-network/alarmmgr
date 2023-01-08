@@ -193,7 +193,25 @@ export class BridgeE2E {
   }
 
   async ecdsaMessagesSigningRelayDetect(): Promise<Alert[]> {
-    throw new Error("Function not implemented.");
+    const MAX_ALLOWED_DELAY = 600;
+    const alerts = Alerts.create();
+    const relayed = (await this.executionLayerClient.posaLightClient.block_number()).toNumber();
+    const latest = await this.substrateIndex.latestCollectedMessageSignatures();
+
+    if (latest.commitmentBlockNumber > relayed) {
+      const currentHeader = await this.substrateClient.rpc.chain.getHeader();
+      const currentBlockNumber = currentHeader.number.toNumber();
+      if (currentBlockNumber - latest.blockNumber > MAX_ALLOWED_DELAY) {
+        alerts.push({
+          priority: Priority.P1,
+          title: `ECDSA messages root relay time out`,
+          body: `ECDSA messages root not relayed since ${latest.blockNumber}`,
+          mark: `bridge-darwinia-ecdsa-message-relay`
+        })
+
+      }
+    }
+    return alerts.alerts();
   }
 
   async ecdsaAuthoritiesSigningRelayDetect(): Promise<Alert[]> {
