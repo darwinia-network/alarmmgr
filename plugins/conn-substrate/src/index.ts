@@ -17,10 +17,10 @@ export class SubstrateClientInstance {
   }
 
   private static async _instance(endpoint): Promise<ApiPromise> {
-    const conn = this.connectionMap.get(endpoint);
-    if (conn) {
-      return conn;
-    }
+    // const conn = this.connectionMap.get(endpoint);
+    // if (conn) {
+    //   return conn;
+    // }
     if (endpoint.indexOf('http://') === 0 || endpoint.indexOf('https://') === 0) {
       logger.info(`connect to ${endpoint}`);
       const provider = new HttpProvider(endpoint);
