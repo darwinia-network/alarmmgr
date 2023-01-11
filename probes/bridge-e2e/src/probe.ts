@@ -1,4 +1,4 @@
-import { ApiPromise, WsProvider } from "@polkadot/api";
+import { ApiPromise, HttpProvider, WsProvider } from "@polkadot/api";
 import { AlarmProbe } from "alarmmgr-probe-traits";
 import { Lifecycle, Alert, Alerts, Priority } from "alarmmgr-types";
 import { BigNumber, ethers, providers } from "ethers";
@@ -42,7 +42,7 @@ export interface BridgeE2eConfig {
   beaconEndpoint: string,
   index: {
     substrateChainEndpoint: string,
-    executionLayerEndpoint: string
+    evmChainEndpoint: string
   }
   darwiniaEvm: DarwiniaEvmConfig,
   executionLayer: ExecutionLayerConfig,
@@ -64,9 +64,9 @@ export class BridgeE2E {
     this.darwiniaEvmClient = new DarwiniaEvmClient(this.config.darwiniaEvm);
     this.executionLayerClient = new ExecutionLayerClient(this.config.executionLayer);
     this.ethApiClient = new Eth2Client(this.config.beaconEndpoint);
-    this.substrateIndex = new SubstrateIndex(this.config.index.substrateChainEndpoint);
+    this.substrateIndex = new SubstrateIndex(this.config.index.substrateChainEndpoint, this.config.index.evmChainEndpoint);
     const provider = new WsProvider(this.config.darwiniaSubstrateEndpoint);
-    this.substrateClient = await ApiPromise.create({ provider });
+    this.substrateClient = await ApiPromise.create({ provider: provider });
   }
 
   async beaconHeaderRelayDetect(): Promise<Alert[]> {
@@ -182,7 +182,7 @@ export class BridgeE2E {
       if (currentBlockNumber - collecting.blockNumber > MAX_ALLOWED_DELAY) {
         alerts.push({
           priority: Priority.P1,
-          mark: `bridge-darwinia-eth-ecdsa`,
+          mark: `bridge-darwinia-ethereum-ecdsa`,
           body: `Authorities change event hasn't collected enough signatures since ${collecting.blockNumber}`,
           title: `ECDSA signatures for authorities change not collected`
         });
@@ -206,7 +206,7 @@ export class BridgeE2E {
           priority: Priority.P1,
           title: `ECDSA messages root relay time out`,
           body: `ECDSA messages root not relayed since ${latest.blockNumber}`,
-          mark: `bridge-darwinia-ecdsa-message-relay`
+          mark: `bridge-darwinia-ethereum-ecdsa-message-relay`
         })
 
       }
@@ -219,11 +219,59 @@ export class BridgeE2E {
   }
 
   async darwiniaMessagesDetect(): Promise<Alert[]> {
-    throw new Error("Function not implemented.");
+    const MAX_ALLOWED_DELAY = 600;
+    const alerts = Alerts.create();
+    const outboundData = await this.darwiniaEvmClient.outbound.outboundLaneNonce();
+    if (!outboundData.latest_generated_nonce.eq(outboundData.latest_received_nonce)) {
+      const latestMessageEvent = await this.substrateIndex.message(outboundData.latest_generated_nonce.toNumber());
+      if (latestMessageEvent !== null) {
+        const currentHeader = await this.substrateClient.rpc.chain.getHeader();
+        const currentBlockNumber = currentHeader.number.toNumber();
+        if (currentBlockNumber - latestMessageEvent.block_number > MAX_ALLOWED_DELAY) {
+          alerts.push({
+            title: `Message from Darwinia to Ethereum timeout`,
+            priority: Priority.P1,
+            body: `Message(nonce: ${latestMessageEvent.nonce}) timeout`,
+            mark: `bridge-darwinia-ethereum-darwinia-message-timeout`,
+          })
+        }
+      }
+    }
+    return alerts.alerts();
   }
 
   async ethMessagesDetect(): Promise<Alert[]> {
-    throw new Error("Function not implemented.");
+    const MAX_ALLOWED_DELAY = 600;
+    const alerts = Alerts.create();
+    const outboundData = await this.executionLayerClient.outbound.outboundLaneNonce();
+    const filter = {
+      fromBlock: "earliest",
+      toBlock: "latest",
+      address: undefined,
+      topics: [],
+    }
+    if (outboundData.latest_generated_nonce.eq(outboundData.latest_received_nonce)) {
+      const eventFilter = this.executionLayerClient.outbound.filters.MessageAccepted(outboundData.latest_generated_nonce);
+      filter.address = eventFilter.address;
+      filter.topics = eventFilter.topics;
+
+      const events = await this.executionLayerClient.provider.getLogs(filter);
+      const latestMessageEvent = events.pop();
+      if (latestMessageEvent !== null) {
+        const currentBlockNumber = await this.executionLayerClient.provider.getBlockNumber();
+        if (currentBlockNumber - latestMessageEvent.blockNumber > MAX_ALLOWED_DELAY) {
+          console.log("Timeout");
+          alerts.push({
+            title: "Message from Ethereum to Darwinia timeout",
+            priority: Priority.P1,
+            body: `Message(nonce: ${outboundData.latest_generated_nonce}) timeout`,
+            mark: `bridge-darwinia-ethereum-eth-message-timeout`
+          })
+        }
+      }
+      console.log("latest messages:", latestMessageEvent);
+    }
+    return [];
   }
 }
 
