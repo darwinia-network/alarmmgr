@@ -38,13 +38,19 @@ export class BridgeE2eProbe implements AlarmProbe {
 }
 
 export interface BridgeE2eConfig {
+  // Darwinia substrate websocket endpoint
   darwiniaSubstrateEndpoint: string,
+  // Beacon node API endpoint
   beaconEndpoint: string,
   index: {
+    // Endpoint of subql index for ecdsa events on Darwinia
     substrateChainEndpoint: string,
+    // Endpoint of thegraph index for message events on Darwinia EVM
     evmChainEndpoint: string
   }
+  // Config for Darwinia EVM
   darwiniaEvm: DarwiniaEvmConfig,
+  // Config for Ethereum execution layer
   executionLayer: ExecutionLayerConfig,
 }
 
@@ -78,9 +84,7 @@ export class BridgeE2E {
     const latestSlot = BigNumber.from(latest.header.message.slot);
     const relayed = await this.darwiniaEvmClient.beaconLightClient.finalized_header();
     const delay = latestSlot.sub(relayed.slot);
-    console.log(`Current: ${latestSlot}, Relayed: ${relayed.slot}, Delay: ${delay}`);
     if (delay > MAX_ALLOWED_DELAY) {
-      console.log("Delay too much");
       alerts.push({
         priority: Priority.P1,
         mark: `bridge-darwinia-ethereum-beacon-header-relay`,
@@ -99,7 +103,6 @@ export class BridgeE2E {
     const relayed = await this.darwiniaEvmClient.executionLayer.block_number();
     const current = await this.executionLayerClient.provider.getBlockNumber();
     const delay = BigNumber.from(current).sub(relayed);
-    console.log(`Current: ${current}, Relayed: ${relayed}, Delay: ${delay}`);
     if (delay > MAX_ALLOWED_DELAY) {
       alerts.push({
         priority: Priority.P1,
@@ -125,7 +128,6 @@ export class BridgeE2E {
       })
     }
 
-    console.log(`Slot ${currentSlot}, Period ${currentPeriod}, Root ${syncCommitteeRoot}`);
     return alerts.alerts();
   }
 
@@ -254,7 +256,7 @@ export class BridgeE2E {
       address: undefined,
       topics: [],
     }
-    if (outboundData.latest_generated_nonce.eq(outboundData.latest_received_nonce)) {
+    if (!outboundData.latest_generated_nonce.eq(outboundData.latest_received_nonce)) {
       const eventFilter = this.executionLayerClient.outbound.filters.MessageAccepted(outboundData.latest_generated_nonce);
       filter.address = eventFilter.address;
       filter.topics = eventFilter.topics;
@@ -264,7 +266,6 @@ export class BridgeE2E {
       if (latestMessageEvent !== null) {
         const currentBlockNumber = await this.executionLayerClient.provider.getBlockNumber();
         if (currentBlockNumber - latestMessageEvent.blockNumber > MAX_ALLOWED_DELAY) {
-          console.log("Timeout");
           alerts.push({
             title: "Message from Ethereum to Darwinia timeout",
             priority: Priority.P1,
@@ -273,24 +274,30 @@ export class BridgeE2E {
           })
         }
       }
-      console.log("latest messages:", latestMessageEvent);
     }
-    return [];
+    return alerts.alerts();
   }
 }
 
 export interface DarwiniaEvmConfig {
+  // API endpoint
   endpoint: string,
+  // Beacon lightclient contract address
   beaconLightClientAddress: string,
+  // Execution layer contract address
   executionLaterAddress: string,
+
   inboundAddress: string,
   outboundAddress: string,
   feemarketAddress: string,
 }
 
 export interface ExecutionLayerConfig {
+  // API endpoint
   endpoint: string,
+  // Darwinia light client contract address
   posaLightClientAddress: string,
+
   inboundAddress: string,
   outboundAddress: string,
   feemarketAddress: string,
