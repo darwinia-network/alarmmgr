@@ -83,7 +83,8 @@ export class BridgeE2E {
       console.log("Delay too much");
       alerts.push({
         priority: Priority.P1,
-        mark: `Bridge Eth<>Darwinia beacon header relay has stopped since ${relayed.slot} `,
+        mark: `bridge-darwinia-ethereum-beacon-header-relay`,
+        body: `Bridge Eth<>Darwinia beacon header relay has stopped since ${relayed.slot} `,
         title: "Eth->Darwinia beacon header relay stopped",
       })
     }
@@ -102,7 +103,8 @@ export class BridgeE2E {
     if (delay > MAX_ALLOWED_DELAY) {
       alerts.push({
         priority: Priority.P1,
-        mark: `Bridge Eth<>Darwinia execution layer relay has stopped since ${relayed}`,
+        mark: `bridge-darwinia-ethereum-execution-layer-relay`,
+        body: `Bridge Eth<>Darwinia execution layer relay has stopped since ${relayed}`,
         title: "Eth->Darwinia execution layer relay stopped",
       })
     }
@@ -117,7 +119,8 @@ export class BridgeE2E {
     if (syncCommitteeRoot === '0x0000000000000000000000000000000000000000000000000000000000000000') {
       alerts.push({
         priority: Priority.P1,
-        mark: `Bridge Eth<>Darwinia sync committee at period ${currentPeriod} hasn't been relayed`,
+        mark: `bridge-darwinia-ethereum-sync-committee-relay`,
+        body: `Bridge Eth<>Darwinia sync committee at period ${currentPeriod} hasn't been relayed`,
         title: "Eth->Darwinia sync committee relay stopped",
       })
     }
@@ -154,7 +157,8 @@ export class BridgeE2E {
       if (isTooMuchDelay(collecting, currentBlockNumber)) {
         alerts.push({
           priority: Priority.P1,
-          mark: `Bridge Eth<>Darwinia ECDSA signatures for new message root(${collecting.blockNumber}) hasn't been collected}`,
+          mark: `bridge-darwinia-ethereum-ecdsa-message`,
+          body: `Bridge Eth<>Darwinia ECDSA signatures for new message root(${collecting.blockNumber}) hasn't been collected}`,
           title: `ECDSA signatures for new message root not collected`,
         })
         return alerts.alerts();
@@ -182,7 +186,7 @@ export class BridgeE2E {
       if (currentBlockNumber - collecting.blockNumber > MAX_ALLOWED_DELAY) {
         alerts.push({
           priority: Priority.P1,
-          mark: `bridge-darwinia-ethereum-ecdsa`,
+          mark: `bridge-darwinia-ethereum-ecdsa-authorities`,
           body: `Authorities change event hasn't collected enough signatures since ${collecting.blockNumber}`,
           title: `ECDSA signatures for authorities change not collected`
         });
