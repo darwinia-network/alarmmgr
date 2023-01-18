@@ -22,8 +22,8 @@ const darwinia = {
     },
     ethereum: {
       contract: {
-        lc_consensus: '0x9C266C48F07121181d8424768f0deD0170cC63A6',
-        lc_execution: '0xe50F1Ddf0C8778773f07Eb2759d045Ece19F6Cc1',
+        lc_consensus: '0xD2A37C4523542F2dFD7Cb792D2aeAd5c61C1bAAE',
+        lc_execution: '0xeC3c9B4d3674B3D03fdf20b082A3C2c669075990',
         inbound: '0xf1B8a9F8436800499DB8186f2da2fb3e78Ff7c2B',
         outbound: '0xcA3749C8C3aF04278D596a3fBe461481B6aa1b01',
         feemarket: '0xcA927Df15afb7629b79dA4713a871190315c7409',
@@ -33,6 +33,7 @@ const darwinia = {
     },
   },
   subql: 'https://subql.darwinia.network/subql-bridger-darwinia',
+  thegraph: 'https://thegraph.darwinia.network/ethv2/subgraphs/name/bridge-darwinia',
 };
 
 const crab = {
@@ -276,6 +277,7 @@ const ethereum = {
   endpoint: {
     http: 'https://eth-mainnet.g.alchemy.com/v2/x-Yy-QAog0fzfJQlr0VKreOZaq4KgVUJ',
   },
+  beacon: 'http://unstable.mainnet.beacon-api.nimbus.team',
   name: 'Ethereum',
   logo: 'https://cdn.worldvectorlogo.com/logos/ethereum-eth.svg',
   color: '#627eea',
