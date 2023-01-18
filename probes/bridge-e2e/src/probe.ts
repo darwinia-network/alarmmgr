@@ -1,39 +1,64 @@
 import { ApiPromise, HttpProvider, WsProvider } from "@polkadot/api";
 import { AlarmProbe } from "alarmmgr-probe-traits";
-import { Lifecycle, Alert, Alerts, Priority } from "alarmmgr-types";
+import { Lifecycle, Alert, Alerts, Priority, BRIDGE_CHAIN_INFO } from "alarmmgr-types";
 import { BigNumber, ethers, providers } from "ethers";
 import { BeaconLightClient, ExecutionLayer, Inbound, Outbound, POSALightClient } from "../types/ethers-contracts";
 import { BeaconLightClient__factory, ExecutionLayer__factory, Inbound__factory, Outbound__factory, POSALightClient__factory } from "../types/ethers-contracts/factories";
 import { Eth2Client } from "./eth2_client";
 import { BasicEvent, SubstrateIndex } from "./substrate_index";
+import { logger } from "alarmmgr-logger";
 
 
 export class BridgeE2eProbe implements AlarmProbe {
 
   async probe(_lifecycle: Lifecycle): Promise<Alert[]> {
-    return []
-    //   const alerts = Alerts.create();
-    //   const detects = [
-    //     beacon_header_relay_detect,             // eth -> darwinia beacon header relay
-    //     execution_layer_relay_detect,           // eth -> darwinia execution layer state root relay
-    //     sync_committee_relay_detect,            // eth -> darwinia sync committee root relay
-    //     ecdsa_messages_signing_detect,          // darwinia ecdsa messages signing
-    //     ecdsa_authorities_signing_detect,       // darwinia ecdsa authorities signing
-    //     ecdsa_messages_signing_relay_detect,    // darwinia ecdsa messages signing relay
-    //     ecdsa_authorities_signing_relay_detect, // darwinia ecdsa authorities signing relay
-    //     darwinia_messages_detect,               // darwinia -> eth messages delivery and messages confirmation
-    //     eth_messages_detect,                    // eth -> darwinia messages delivery and messages confirmation
-    //   ];
-
-    //   await Promise.all(
-    //     detects.map(
-    //       async (f) => {
-    //         const _alerts = await f();
-    //         alerts.merge(_alerts);
-    //       }
-    //     )
-    //   )
-    //   return alerts.alerts();
+    const alerts = Alerts.create();
+    const darwinia = BRIDGE_CHAIN_INFO['darwinia'];
+    const eth = BRIDGE_CHAIN_INFO['ethereum'];
+    const config: BridgeE2eConfig = {
+      darwiniaSubstrateEndpoint: darwinia.endpoint.websocket,
+      beaconEndpoint: eth.beacon,
+      index: {
+        substrateChainEndpoint: darwinia.subql,
+        evmChainEndpoint: darwinia.thegraph,
+      },
+      darwiniaEvm: {
+        endpoint: darwinia.endpoint.http,
+        beaconLightClientAddress: darwinia.bridge_target.ethereum.contract.lc_consensus,
+        executionLaterAddress: darwinia.bridge_target.ethereum.contract.lc_execution,
+        inboundAddress: darwinia.bridge_target.ethereum.contract.inbound,
+        outboundAddress: darwinia.bridge_target.ethereum.contract.outbound,
+        feemarketAddress: darwinia.bridge_target.ethereum.contract.feemarket,
+      },
+      executionLayer: {
+        endpoint: eth.endpoint.http,
+        posaLightClientAddress: eth.bridge_target.darwinia.contract.posa,
+        inboundAddress: eth.bridge_target.darwinia.contract.inbound,
+        outboundAddress: eth.bridge_target.darwinia.contract.outbound,
+        feemarketAddress: eth.bridge_target.darwinia.contract.feemarket,
+      }
+    }
+    const service = new BridgeE2E(config);
+    await service.setUp();
+    const detects = [
+      service.syncCommitteeRelayDetect,
+      service.executionLayerRelayDetect,
+      service.beaconHeaderRelayDetect,
+      service.ecdsaMessagesSigningDetect,
+      service.ecdsaAuthoritiesSigningDetect,
+      service.ecdsaMessagesSigningRelayDetect,
+      service.darwiniaMessagesDetect,
+      service.ethMessagesDetect,
+    ]
+    await Promise.all(
+      detects.map(
+        async (f) => {
+          const _alerts = await f();
+          alerts.merge(_alerts);
+        }
+      )
+    )
+    return alerts.alerts();
   }
 }
 
@@ -70,12 +95,14 @@ export class BridgeE2E {
     this.darwiniaEvmClient = new DarwiniaEvmClient(this.config.darwiniaEvm);
     this.executionLayerClient = new ExecutionLayerClient(this.config.executionLayer);
     this.ethApiClient = new Eth2Client(this.config.beaconEndpoint);
+    console.log(this.config);
     this.substrateIndex = new SubstrateIndex(this.config.index.substrateChainEndpoint, this.config.index.evmChainEndpoint);
     const provider = new WsProvider(this.config.darwiniaSubstrateEndpoint);
     this.substrateClient = await ApiPromise.create({ provider: provider });
   }
 
-  async beaconHeaderRelayDetect(): Promise<Alert[]> {
+  beaconHeaderRelayDetect = async (): Promise<Alert[]> => {
+    logger.trace("beaconHeaderRelayDetect");
     // 600 slot is about 2 hour.
     const MAX_ALLOWED_DELAY = BigNumber.from(600);
 
@@ -95,10 +122,10 @@ export class BridgeE2E {
     return alerts.alerts();
   }
 
-  async executionLayerRelayDetect(): Promise<Alert[]> {
+  executionLayerRelayDetect = async (): Promise<Alert[]> => {
+    logger.trace("executionLayerRelayDetect");
     // 600 blocks is about 2 hour.
     const MAX_ALLOWED_DELAY = BigNumber.from(600);
-
     const alerts = Alerts.create();
     const relayed = await this.darwiniaEvmClient.executionLayer.block_number();
     const current = await this.executionLayerClient.provider.getBlockNumber();
@@ -114,7 +141,8 @@ export class BridgeE2E {
     return alerts.alerts();
   }
 
-  async syncCommitteeRelayDetect(): Promise<Alert[]> {
+  syncCommitteeRelayDetect = async (): Promise<Alert[]> => {
+    logger.trace("syncCommitteeRelayDetect");
     const alerts = Alerts.create();
     const currentSlot = BigNumber.from((await this.ethApiClient.getHeader('head')).header.message.slot);
     const currentPeriod = currentSlot.div(32).div(256);
@@ -131,7 +159,8 @@ export class BridgeE2E {
     return alerts.alerts();
   }
 
-  async ecdsaMessagesSigningDetect(): Promise<Alert[]> {
+  ecdsaMessagesSigningDetect = async (): Promise<Alert[]> => {
+    logger.trace("ecdsaMessagesSigningDetect");
     const MAX_ALLOWED_DELAY = 600;
     const isTooMuchDelay = (_collecting: BasicEvent, _currentBlockNumber: number) => {
       if (_currentBlockNumber - _collecting.blockNumber > MAX_ALLOWED_DELAY) {
@@ -170,7 +199,8 @@ export class BridgeE2E {
     return []
   }
 
-  async ecdsaAuthoritiesSigningDetect(): Promise<Alert[]> {
+  ecdsaAuthoritiesSigningDetect = async (): Promise<Alert[]> => {
+    logger.trace("ecdsaAuthoritiesSigningDetect");
     const MAX_ALLOWED_DELAY = 600;
     const alerts = Alerts.create();
     const collecting = await this.substrateIndex.latestCollectingAuthoritiesChange();
@@ -198,7 +228,8 @@ export class BridgeE2E {
     return [];
   }
 
-  async ecdsaMessagesSigningRelayDetect(): Promise<Alert[]> {
+  ecdsaMessagesSigningRelayDetect = async (): Promise<Alert[]> => {
+    logger.trace("ecdsaMessagesSigningRelayDetect");
     const MAX_ALLOWED_DELAY = 600;
     const alerts = Alerts.create();
     const relayed = (await this.executionLayerClient.posaLightClient.block_number()).toNumber();
@@ -220,11 +251,12 @@ export class BridgeE2E {
     return alerts.alerts();
   }
 
-  async ecdsaAuthoritiesSigningRelayDetect(): Promise<Alert[]> {
+  ecdsaAuthoritiesSigningRelayDetect = async (): Promise<Alert[]> => {
     throw new Error("Function not implemented.");
   }
 
-  async darwiniaMessagesDetect(): Promise<Alert[]> {
+  darwiniaMessagesDetect = async (): Promise<Alert[]> => {
+    logger.trace("darwiniaMessagesDetect");
     const MAX_ALLOWED_DELAY = 600;
     const alerts = Alerts.create();
     const outboundData = await this.darwiniaEvmClient.outbound.outboundLaneNonce();
@@ -246,7 +278,8 @@ export class BridgeE2E {
     return alerts.alerts();
   }
 
-  async ethMessagesDetect(): Promise<Alert[]> {
+  ethMessagesDetect = async (): Promise<Alert[]> => {
+    logger.trace("ethMessagesDetect");
     const MAX_ALLOWED_DELAY = 600;
     const alerts = Alerts.create();
     const outboundData = await this.executionLayerClient.outbound.outboundLaneNonce();

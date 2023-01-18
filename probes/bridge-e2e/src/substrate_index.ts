@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { logger } from 'alarmmgr-logger'
 
 export class SubstrateIndex {
   ecdsaIndexHost: string;
@@ -20,13 +21,13 @@ export class SubstrateIndex {
   }
 
   async latestCollectingAuthoritiesChange(): Promise<BasicEvent | null> {
-    const result: Response<EnoughMessageSignatures> = await this.query(this.ecdsaIndexHost, COLLECTING_NEW_AUTHORITIES_CHANGE, {});
-    return result.data.collectedEnoughNewMessageRootSignaturesEvents.nodes.pop() || null;
+    const result: Response<CollectingNewAuthoritiesChange> = await this.query(this.ecdsaIndexHost, COLLECTING_NEW_AUTHORITIES_CHANGE, {});
+    return result.data.collectingAuthoritiesChangeSignaturesEvents.nodes.pop() || null;
   }
 
   async latestCollectedAuthoritiesChange(): Promise<BasicEvent | null> {
-    const result: Response<EnoughMessageSignatures> = await this.query(this.ecdsaIndexHost, COLLECTED_AUTHORITIES_CHANGE, {});
-    return result.data.collectedEnoughNewMessageRootSignaturesEvents.nodes.pop() || null;
+    const result: Response<CollectedNewAuthoritiesChange> = await this.query(this.ecdsaIndexHost, COLLECTED_AUTHORITIES_CHANGE, {});
+    return result.data.collectedEnoughAuthoritiesChangeSignaturesEvents.nodes.pop() || null;
   }
 
   async message(nonce: number): Promise<MessageEvent | null> {
@@ -41,6 +42,7 @@ export class SubstrateIndex {
       query,
       variables,
     };
+    logger.trace(`[IndexQuery] ${host} ${query} ${variables}`)
     const response = await fetch(host, {
       method: "post",
       headers: { 'Content-Type': 'application/json' },
@@ -49,6 +51,7 @@ export class SubstrateIndex {
     if (!response.ok) {
       throw new Error(response.statusText);
     }
+    logger.trace(`[IndexResponse] ${await response.clone().text()}`)
     const data: R = await response.json();
     return data;
   }
