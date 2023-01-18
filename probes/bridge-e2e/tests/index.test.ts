@@ -1,4 +1,5 @@
-import { BridgeE2E, DarwiniaEvmClient, DarwiniaEvmConfig } from "../src";
+import { DarwiniaEvmClient, DarwiniaEvmConfig } from "../src";
+import { Eth2Client } from "../src/eth2_client";
 
 describe('testing DarwiniaEvmClient', () => {
   const config: DarwiniaEvmConfig = {
@@ -11,10 +12,18 @@ describe('testing DarwiniaEvmClient', () => {
   }
   const client = new DarwiniaEvmClient(config);
 
-  test('test inbound', async () => {
+  xtest('test inbound', async () => {
     const nonce = await client.inbound.inboundLaneNonce();
     console.log(nonce);
     const laneInfo = await client.inbound.getLaneInfo();
     console.log(laneInfo);
   }, 60000);
 });
+
+describe('testing eth2 client', () => {
+  const client = new Eth2Client("http://unstable.mainnet.beacon-api.nimbus.team");
+  xtest('test api', async () => {
+    const header = await client.getHeader("head");
+    console.log(header);
+  }, 60000)
+})
