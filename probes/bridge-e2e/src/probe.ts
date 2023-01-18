@@ -1,4 +1,4 @@
-import { ApiPromise, HttpProvider, WsProvider } from "@polkadot/api";
+import { ApiPromise, WsProvider } from "@polkadot/api";
 import { AlarmProbe } from "alarmmgr-probe-traits";
 import { Lifecycle, Alert, Alerts, Priority, BRIDGE_CHAIN_INFO } from "alarmmgr-types";
 import { BigNumber, ethers, providers } from "ethers";
@@ -11,10 +11,11 @@ import { logger } from "alarmmgr-logger";
 
 export class BridgeE2eProbe implements AlarmProbe {
 
-  async probe(_lifecycle: Lifecycle): Promise<Alert[]> {
+  async probe(lifecycle: Lifecycle): Promise<Alert[]> {
     const alerts = Alerts.create();
     const darwinia = BRIDGE_CHAIN_INFO['darwinia'];
     const eth = BRIDGE_CHAIN_INFO['ethereum'];
+
     const config: BridgeE2eConfig = {
       darwiniaSubstrateEndpoint: darwinia.endpoint.websocket,
       beaconEndpoint: eth.beacon,
@@ -36,7 +37,9 @@ export class BridgeE2eProbe implements AlarmProbe {
         inboundAddress: eth.bridge_target.darwinia.contract.inbound,
         outboundAddress: eth.bridge_target.darwinia.contract.outbound,
         feemarketAddress: eth.bridge_target.darwinia.contract.feemarket,
-      }
+      },
+      lifecycle,
+      maxAllowGapMinutes: 1,
     }
     const service = new BridgeE2E(config);
     await service.setUp();
@@ -58,6 +61,7 @@ export class BridgeE2eProbe implements AlarmProbe {
         }
       )
     )
+    console.log(alerts);
     return alerts.alerts();
   }
 }
@@ -77,10 +81,14 @@ export interface BridgeE2eConfig {
   darwiniaEvm: DarwiniaEvmConfig,
   // Config for Ethereum execution layer
   executionLayer: ExecutionLayerConfig,
+  lifecycle: Lifecycle,
+  maxAllowGapMinutes: number,
 }
 
 export class BridgeE2E {
   private readonly config: BridgeE2eConfig;
+  private readonly lifecycle: Lifecycle;
+  private maxAllowGapMinutes: number;
   private darwiniaEvmClient: DarwiniaEvmClient;
   private executionLayerClient: ExecutionLayerClient;
   private ethApiClient: Eth2Client;
@@ -89,16 +97,40 @@ export class BridgeE2E {
 
   constructor(option: BridgeE2eConfig) {
     this.config = option;
+    this.lifecycle = option.lifecycle;
+    this.maxAllowGapMinutes = option.maxAllowGapMinutes * 60 * 1000;
   }
 
   async setUp() {
     this.darwiniaEvmClient = new DarwiniaEvmClient(this.config.darwiniaEvm);
     this.executionLayerClient = new ExecutionLayerClient(this.config.executionLayer);
     this.ethApiClient = new Eth2Client(this.config.beaconEndpoint);
-    console.log(this.config);
     this.substrateIndex = new SubstrateIndex(this.config.index.substrateChainEndpoint, this.config.index.evmChainEndpoint);
     const provider = new WsProvider(this.config.darwiniaSubstrateEndpoint);
     this.substrateClient = await ApiPromise.create({ provider: provider });
+  }
+
+  async checkAlert(alert: Alert): Promise<Alert | null> {
+    let lastProbeTime = await this.lifecycle.kv.get(alert.mark);
+    logger.trace(`lastProbeTime: ${lastProbeTime}`);
+    if (!lastProbeTime) {
+      lastProbeTime = +new Date();
+      logger.trace(lastProbeTime);
+      await this.lifecycle.kv.set(alert.mark, lastProbeTime);
+    }
+
+    const now = +new Date();
+    logger.trace(`now: ${now}`);
+    const gap = now - (+lastProbeTime);
+    logger.trace(`gap: ${gap}, maxAllowGapMinutes: ${this.maxAllowGapMinutes}`);
+
+    if (gap > this.maxAllowGapMinutes) {
+      lastProbeTime = +new Date();
+      await this.lifecycle.kv.set(alert.mark, lastProbeTime);
+      return alert;
+    }
+
+    return null;
   }
 
   beaconHeaderRelayDetect = async (): Promise<Alert[]> => {
@@ -111,13 +143,19 @@ export class BridgeE2E {
     const latestSlot = BigNumber.from(latest.header.message.slot);
     const relayed = await this.darwiniaEvmClient.beaconLightClient.finalized_header();
     const delay = latestSlot.sub(relayed.slot);
-    if (delay > MAX_ALLOWED_DELAY) {
-      alerts.push({
+    console.log(latestSlot.toNumber(), relayed.slot.toNumber(), delay.toNumber());
+    if (delay.gt(MAX_ALLOWED_DELAY)) {
+      const mark = `bridge-darwinia-ethereum-beacon-header-relay`;
+      let alert = {
         priority: Priority.P1,
-        mark: `bridge-darwinia-ethereum-beacon-header-relay`,
         body: `Bridge Eth<>Darwinia beacon header relay has stopped since ${relayed.slot} `,
         title: "Eth->Darwinia beacon header relay stopped",
-      })
+        mark,
+      };
+      const checked: Alert | null = await this.checkAlert(alert);
+      if (checked !== null) {
+        alerts.push(alert);
+      }
     }
     return alerts.alerts();
   }
@@ -130,13 +168,19 @@ export class BridgeE2E {
     const relayed = await this.darwiniaEvmClient.executionLayer.block_number();
     const current = await this.executionLayerClient.provider.getBlockNumber();
     const delay = BigNumber.from(current).sub(relayed);
-    if (delay > MAX_ALLOWED_DELAY) {
-      alerts.push({
+    console.log(relayed.toNumber(), current, delay.toNumber())
+    if (delay.gt(MAX_ALLOWED_DELAY)) {
+      const mark = `bridge-darwinia-ethereum-execution-layer-relay`;
+      let alert = {
         priority: Priority.P1,
-        mark: `bridge-darwinia-ethereum-execution-layer-relay`,
         body: `Bridge Eth<>Darwinia execution layer relay has stopped since ${relayed}`,
         title: "Eth->Darwinia execution layer relay stopped",
-      })
+        mark,
+      };
+      const checked: Alert | null = await this.checkAlert(alert);
+      if (checked !== null) {
+        alerts.push(alert);
+      }
     }
     return alerts.alerts();
   }
@@ -148,12 +192,17 @@ export class BridgeE2E {
     const currentPeriod = currentSlot.div(32).div(256);
     const syncCommitteeRoot = await this.darwiniaEvmClient.beaconLightClient.sync_committee_roots(currentPeriod);
     if (syncCommitteeRoot === '0x0000000000000000000000000000000000000000000000000000000000000000') {
-      alerts.push({
+      const mark = `bridge-darwinia-ethereum-sync-committee-relay`;
+      let alert = {
         priority: Priority.P1,
-        mark: `bridge-darwinia-ethereum-sync-committee-relay`,
         body: `Bridge Eth<>Darwinia sync committee at period ${currentPeriod} hasn't been relayed`,
         title: "Eth->Darwinia sync committee relay stopped",
-      })
+        mark,
+      };
+      const checked: Alert | null = await this.checkAlert(alert);
+      if (checked !== null) {
+        alerts.push(alert);
+      }
     }
 
     return alerts.alerts();
@@ -186,12 +235,17 @@ export class BridgeE2E {
 
     if (collected === null || collected.commitmentBlockNumber != collecting.blockNumber) {
       if (isTooMuchDelay(collecting, currentBlockNumber)) {
-        alerts.push({
+        const mark = `bridge-darwinia-ethereum-ecdsa-message`;
+        let alert = {
           priority: Priority.P1,
-          mark: `bridge-darwinia-ethereum-ecdsa-message`,
           body: `Bridge Eth<>Darwinia ECDSA signatures for new message root(${collecting.blockNumber}) hasn't been collected}`,
           title: `ECDSA signatures for new message root not collected`,
-        })
+          mark,
+        };
+        const checked: Alert | null = await this.checkAlert(alert);
+        if (checked !== null) {
+          alerts.push(alert);
+        }
         return alerts.alerts();
       }
     }
@@ -216,12 +270,18 @@ export class BridgeE2E {
       const currentHeader = await this.substrateClient.rpc.chain.getHeader();
       const currentBlockNumber = currentHeader.number.toNumber();
       if (currentBlockNumber - collecting.blockNumber > MAX_ALLOWED_DELAY) {
-        alerts.push({
+        const mark = `bridge-darwinia-ethereum-ecdsa-authorities`;
+        let alert = {
           priority: Priority.P1,
-          mark: `bridge-darwinia-ethereum-ecdsa-authorities`,
           body: `Authorities change event hasn't collected enough signatures since ${collecting.blockNumber}`,
-          title: `ECDSA signatures for authorities change not collected`
-        });
+          title: `ECDSA signatures for authorities change not collected`,
+          mark,
+        };
+        const checked: Alert | null = await this.checkAlert(alert);
+        if (checked !== null) {
+          alerts.push(alert);
+        }
+
         return alerts.alerts();
       }
     }
@@ -239,13 +299,17 @@ export class BridgeE2E {
       const currentHeader = await this.substrateClient.rpc.chain.getHeader();
       const currentBlockNumber = currentHeader.number.toNumber();
       if (currentBlockNumber - latest.blockNumber > MAX_ALLOWED_DELAY) {
-        alerts.push({
+        const mark = `bridge-darwinia-ethereum-ecdsa-message-relay`;
+        let alert = {
           priority: Priority.P1,
           title: `ECDSA messages root relay time out`,
           body: `ECDSA messages root not relayed since ${latest.blockNumber}`,
-          mark: `bridge-darwinia-ethereum-ecdsa-message-relay`
-        })
-
+          mark
+        };
+        const checked: Alert | null = await this.checkAlert(alert);
+        if (checked !== null) {
+          alerts.push(alert);
+        }
       }
     }
     return alerts.alerts();
@@ -266,12 +330,17 @@ export class BridgeE2E {
         const currentHeader = await this.substrateClient.rpc.chain.getHeader();
         const currentBlockNumber = currentHeader.number.toNumber();
         if (currentBlockNumber - latestMessageEvent.block_number > MAX_ALLOWED_DELAY) {
-          alerts.push({
+          const mark = `bridge-darwinia-ethereum-darwinia-message-timeout`;
+          let alert = {
             title: `Message from Darwinia to Ethereum timeout`,
             priority: Priority.P1,
             body: `Message(nonce: ${latestMessageEvent.nonce}) timeout`,
-            mark: `bridge-darwinia-ethereum-darwinia-message-timeout`,
-          })
+            mark,
+          };
+          const checked: Alert | null = await this.checkAlert(alert);
+          if (checked !== null) {
+            alerts.push(alert);
+          }
         }
       }
     }
@@ -299,12 +368,17 @@ export class BridgeE2E {
       if (latestMessageEvent !== null) {
         const currentBlockNumber = await this.executionLayerClient.provider.getBlockNumber();
         if (currentBlockNumber - latestMessageEvent.blockNumber > MAX_ALLOWED_DELAY) {
-          alerts.push({
+          const mark = `bridge-darwinia-ethereum-eth-message-timeout`;
+          let alert = {
             title: "Message from Ethereum to Darwinia timeout",
             priority: Priority.P1,
             body: `Message(nonce: ${outboundData.latest_generated_nonce}) timeout`,
-            mark: `bridge-darwinia-ethereum-eth-message-timeout`
-          })
+            mark
+          };
+          const checked: Alert | null = await this.checkAlert(alert);
+          if (checked !== null) {
+            alerts.push(alert);
+          }
         }
       }
     }
