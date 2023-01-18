@@ -61,7 +61,6 @@ export class BridgeE2eProbe implements AlarmProbe {
         }
       )
     )
-    console.log(alerts);
     return alerts.alerts();
   }
 }
@@ -143,7 +142,6 @@ export class BridgeE2E {
     const latestSlot = BigNumber.from(latest.header.message.slot);
     const relayed = await this.darwiniaEvmClient.beaconLightClient.finalized_header();
     const delay = latestSlot.sub(relayed.slot);
-    console.log(latestSlot.toNumber(), relayed.slot.toNumber(), delay.toNumber());
     if (delay.gt(MAX_ALLOWED_DELAY)) {
       const mark = `bridge-darwinia-ethereum-beacon-header-relay`;
       let alert = {
@@ -168,7 +166,6 @@ export class BridgeE2E {
     const relayed = await this.darwiniaEvmClient.executionLayer.block_number();
     const current = await this.executionLayerClient.provider.getBlockNumber();
     const delay = BigNumber.from(current).sub(relayed);
-    console.log(relayed.toNumber(), current, delay.toNumber())
     if (delay.gt(MAX_ALLOWED_DELAY)) {
       const mark = `bridge-darwinia-ethereum-execution-layer-relay`;
       let alert = {
