@@ -1,0 +1,208 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "consensus_layer",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "block_number",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "state_root",
+        "type": "bytes32"
+      }
+    ],
+    "name": "LatestExecutionPayloadImported",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "CONSENSUS_LAYER",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "block_number",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "randao_reveal",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "eth1_data",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "graffiti",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "proposer_slashings",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "attester_slashings",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "attestations",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "deposits",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "voluntary_exits",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "sync_aggregate",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "parent_hash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "fee_recipient",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "state_root",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "receipts_root",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "logs_bloom",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "prev_randao",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "block_number",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "gas_limit",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "gas_used",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "timestamp",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "extra_data",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "base_fee_per_gas",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "block_hash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "transactions",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct BeaconChain.ExecutionPayload",
+            "name": "execution_payload",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct BeaconChain.BeaconBlockBody",
+        "name": "body",
+        "type": "tuple"
+      }
+    ],
+    "name": "import_latest_execution_payload_state_root",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "merkle_root",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
