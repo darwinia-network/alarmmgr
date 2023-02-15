@@ -23,7 +23,7 @@ export class S2SBridgeProbeDetectGrandpa {
     this.arg = options.arg;
     this.sourceSubql = options.sourceSubql;
     this.targetSubql = options.targetSubql;
-    this.maxAllowMissingBlock = 800;
+    this.maxAllowMissingBlock = 500;
     this.parachainBridge = options.parachainBridge ?? false;
     this.grandpaPalletName = options.grandpaPalletName;
   }
