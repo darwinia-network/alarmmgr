@@ -4,7 +4,6 @@ import {SoloWithParaArg} from "../types/inner";
 import {Subquery} from "alarmmgr-subquery";
 import {S2SBridgeProbeDetectGrandpa} from "../common/detect_grandpa";
 import {S2SBridgeProbeDetectMessage} from "../common/detect_message";
-import {S2SBridgeProbeDetectParahead} from "../common/detect_parahead";
 
 export class SoloWithParaBridgeProde implements AlarmProbe {
 
