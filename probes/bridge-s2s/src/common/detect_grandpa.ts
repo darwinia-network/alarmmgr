@@ -19,11 +19,12 @@ export class S2SBridgeProbeDetectGrandpa {
     targetSubql: Subquery,
     parachainBridge?: boolean,
     grandpaPalletName?: string,
+    maxAllowMissingBlock?: number,
   }) {
     this.arg = options.arg;
     this.sourceSubql = options.sourceSubql;
     this.targetSubql = options.targetSubql;
-    this.maxAllowMissingBlock = 500;
+    this.maxAllowMissingBlock = options.maxAllowMissingBlock ?? 3600;
     this.parachainBridge = options.parachainBridge ?? false;
     this.grandpaPalletName = options.grandpaPalletName;
   }
