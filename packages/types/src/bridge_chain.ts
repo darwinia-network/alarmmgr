@@ -86,10 +86,12 @@ const pangolin = {
     pangoro: {
       query_name: {
         feemarket: 'pangoroFeeMarket',
-        grandpa: 'bridgePangoroGrandpa',
+        grandpa: 'bridgeMoonbaseGrandpa',
         messages: 'bridgePangoroMessages',
+        parachain: 'bridgeMoonbaseParachain',
       },
       lanes: ['0x726f6c69'],
+      relay_chain: 'moonbase',
     },
     pangolinparachain: {
       query_name: {
@@ -132,10 +134,12 @@ const pangoro = {
     pangolin: {
       query_name: {
         feemarket: 'pangolinFeeMarket',
-        grandpa: 'bridgePangolinGrandpa',
+        grandpa: 'bridgeRococoGrandpa',
         messages: 'bridgePangolinMessages',
+        parachain: 'bridgeRococoParachain',
       },
       lanes: ['0x726f6c69'],
+      relay_chain: 'rococo',
     },
   },
   subql: 'https://subql.darwinia.network/subql-bridger-pangoro',

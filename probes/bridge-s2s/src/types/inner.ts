@@ -22,3 +22,14 @@ export interface SoloWithParaArg {
   relayClient: ApiPromise,
 }
 
+export interface ParaWithParaArg {
+  sourceParaChain: S2SBridgeChain,
+  sourceRelayChain: S2SBridgeChain,
+  targetParaChain: S2SBridgeChain,
+  targetRelayChain: S2SBridgeChain,
+  sourceParaClient: ApiPromise,
+  sourceRelayClient: ApiPromise,
+  targetParaClient: ApiPromise,
+  targetRelayClient: ApiPromise,
+}
+
