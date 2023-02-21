@@ -44,8 +44,10 @@ export class Initializer {
 
     // init http probes
     const httpProbes = [
-      { name: 'api-supply-ring', url: 'https://api.darwinia.network/supply/ring', },
-      { name: 'apps-darwinia', url: 'https://apps.darwinia.network', },
+      { name: 'http-token-supply', url: 'https://api.darwinia.network/supply/ring', },
+      { name: 'http-subql', url: 'https://subql.darwinia.network/subql-bridger-darwinia/', },
+      { name: 'http-thegraph', url: 'https://thegraph.darwinia.network/ethv2/subgraphs/name/bridge-darwinia/graphql', },
+      { name: 'http-apps', url: 'https://apps.darwinia.network', },
     ];
     for (const probe of httpProbes) {
       InstanceCenter.registerProbe(probe.name, new HttpProbe(probe))
