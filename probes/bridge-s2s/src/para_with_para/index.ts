@@ -2,6 +2,8 @@ import {AlarmProbe} from "alarmmgr-probe-traits";
 import {Alert, Lifecycle} from "alarmmgr-types";
 import {ParaWithParaArg} from "../types/inner";
 import {Subquery} from "alarmmgr-subquery";
+import {S2SBridgeProbeDetectGrandpa} from "../common/detect_grandpa";
+import {S2SBridgeProbeDetectMessage} from "../common/detect_message";
 
 
 export class ParaWithParaBridgeProbe implements AlarmProbe {
@@ -27,7 +29,56 @@ export class ParaWithParaBridgeProbe implements AlarmProbe {
   }
 
   async probe(): Promise<Array<Alert>> {
-    return [];
+    const _alertsGrandpaSourceRelayToTargetPara = await new S2SBridgeProbeDetectGrandpa({
+      arg: {
+        sourceChain: this.arg.sourceRelayChain,
+        sourceClient: this.arg.sourceRelayClient,
+        targetChain: this.arg.targetParaChain,
+        targetClient: this.arg.targetParaClient,
+      },
+      sourceSubql: this.sourceRelaySubql,
+      targetSubql: this.targetParaSubql,
+      parachainBridge: true,
+      // @ts-ignore
+      grandpaPalletName: this.arg.targetParaChain.bridge_target[this.arg.sourceParaChain.bridge_chain_name].query_name.grandpa
+    }).detect();
+    const _alertsGrandpaTargetRelayToSourcePara = await new S2SBridgeProbeDetectGrandpa({
+      arg: {
+        sourceChain: this.arg.targetParaChain,
+        sourceClient: this.arg.targetParaClient,
+        targetChain: this.arg.sourceRelayChain,
+        targetClient: this.arg.sourceRelayClient,
+      },
+      sourceSubql: this.targetParaSubql,
+      targetSubql: this.sourceRelaySubql,
+      parachainBridge: true,
+      // @ts-ignore
+      grandpaPalletName: this.arg.sourceParaChain.bridge_target[this.arg.targetParaChain.bridge_chain_name].query_name.grandpa
+    }).detect();
+    const _alertsMessageSourceParaToTargetPara = await new S2SBridgeProbeDetectMessage({
+      arg: {
+        sourceChain: this.arg.sourceParaChain,
+        sourceClient: this.arg.sourceParaClient,
+        targetChain: this.arg.targetParaChain,
+        targetClient: this.arg.targetParaClient,
+      },
+      lifecycle: this.lifecycle,
+    }).detect();
+    const _alertsMessageTargetParaToSourcePara = await new S2SBridgeProbeDetectMessage({
+      arg: {
+        sourceChain: this.arg.targetParaChain,
+        sourceClient: this.arg.targetParaClient,
+        targetChain: this.arg.sourceParaChain,
+        targetClient: this.arg.sourceParaClient,
+      },
+      lifecycle: this.lifecycle,
+    }).detect();
+    return [
+      ..._alertsGrandpaSourceRelayToTargetPara,
+      ..._alertsGrandpaTargetRelayToSourcePara,
+      ..._alertsMessageSourceParaToTargetPara,
+      ..._alertsMessageTargetParaToSourcePara,
+    ];
   }
 
 }
