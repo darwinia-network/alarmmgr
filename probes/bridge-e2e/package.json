@@ -25,7 +25,7 @@
     "alarmmgr-logger": "0.0.1",
     "alarmmgr-probe-traits": "0.0.1",
     "alarmmgr-types": "^0.0.1",
-    "ethers": "^6.6.5",
+    "ethers": "^5.7.2",
     "node-fetch": "^3.3.2"
   }
 }

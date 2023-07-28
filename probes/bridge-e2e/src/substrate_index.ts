@@ -52,7 +52,7 @@ export class SubstrateIndex {
       throw new Error(response.statusText);
     }
     logger.trace(`[IndexResponse] ${await response.clone().text()}`)
-    const data: R = await response.json();
+    const data: R = (await response.json()) as any;
     return data;
   }
 }
