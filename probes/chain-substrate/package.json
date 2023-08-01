@@ -18,7 +18,6 @@
     "alarmmgr-types": "0.0.1",
     "alarmmgr-probe-traits": "0.0.1",
     "alarmmgr-plugin-conn-substrate": "0.0.1",
-    "@darwinia/api-options": "^2.8.10",
     "@polkadot/api": "^10",
     "await-timeout": "^1.1.1"
   }
