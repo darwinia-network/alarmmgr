@@ -21,14 +21,13 @@
     "notifications/*"
   ],
   "scripts": {
-    "boot": "lerna bootstrap",
     "start": "lerna run start --scope alarmmgr-bin --",
     "package": "lerna run package --scope alarmmgr-bin",
     "build:all": "lerna run build",
     "test:all": "lerna run test"
   },
   "devDependencies": {
-    "lerna": "^5.5.2",
-    "nx": "^14.4.3"
+    "lerna": "^7.1.4",
+    "nx": "^16.6.0"
   }
 }

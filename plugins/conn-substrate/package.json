@@ -16,7 +16,6 @@
   "dependencies": {
     "alarmmgr-logger": "0.0.1",
     "alarmmgr-types": "0.0.1",
-    "@darwinia/api-options": "^2.8.10",
-    "@polkadot/api": "^9.4.2"
+    "@polkadot/api": "^10"
   }
 }
